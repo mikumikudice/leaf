@@ -8,7 +8,7 @@ function leaf.debug(tag, ...)
     -- Make all arguments strings --
     for i, a in pairs(arg) do
         
-        arg[i] = tostring(v)
+        arg[i] = tostring(a)
     end
 
     -- Concat arguments --
@@ -18,6 +18,26 @@ function leaf.debug(tag, ...)
 
     if arg ~= '' then out = out ..  '[' .. arg .. ']' end
     print(out)
+end
+
+function leaf.table_first(lst)
+    
+    for i, v in pairs(lst) do
+        
+        return i, v
+    end
+end
+
+function leaf.table_last(lst)
+    
+    local idx, val
+
+    for i, v in pairs(lst) do
+        
+        idx, val = i, v
+    end
+
+    return idx, val
 end
 
 function leaf.table_find(lst, val)
@@ -101,15 +121,9 @@ end
         return {
 
             lt = lt or 0,
-            left = lt or 0,
-
             rt = rt or 0,
-            right = rt or 0,
-
             up = up or 0,
-
             dn = dn or 0,
-            down = dn or 0,
         }
     end
 
@@ -185,8 +199,8 @@ end
 
     function leaf.del_plat(name)
 
-        if name then plats[name] = nil
-        else plats = {} end
+        if name then leaf.plat[name] = nil
+        else leaf.plat = {} end
     end
     
     function leaf.draw_plat()
@@ -276,7 +290,7 @@ end
         love.graphics.draw(leaf.tiled, self.sprt, self.bpos.x, self.bpos.y)
     end
 
-    function leaf.tilemap(data, back, info, sobj, eobj)
+    function leaf.tilemap(main, back, info, obj)
 
         leaf.mainground = {}
         leaf.background = {}
@@ -290,12 +304,12 @@ end
         -- Create Enemies --
         local spawn
         local enemy = {}
-        local tempx  = 0
-        local tempy  = 0
+        local temp_x  = 0
+        local temp_y  = 0
         local invoke = false
 
         -- For every line in the map --
-        for ty, line in pairs(data) do
+        for ty, line in pairs(main) do
 
             -- Split Line --
             local splitd = leaf.string_split(line, ' ')
@@ -368,27 +382,30 @@ end
                 -- Spawn point --
                 if tile == '@' then
                     
-                    local obj_spawn = leaf.table_copy(tpos)
+                    spawn = leaf.table_copy(tpos)
 
-                    obj_spawn.x = obj_spawn.x + 4
-                    obj_spawn.y = obj_spawn.y - 4
-                    
-                    sobj:set_pos(obj_spawn)
-                
+                    spawn.x = spawn.x + 4
+                    spawn.y = spawn.y + 4
+
                 elseif tile == '#' then
 
                     if not invoke then
 
-                        tempx = tpos.x
-                        tempy = tpos.y
+                        temp_x = tpos.x
+                        temp_y = tpos.y
 
-                        enemy[#enemy] = eobj:load()
                         invoke = true
 
                     else
 
-                        enemy[#enemy - 1]:init(tempx + 8, tpos.x - 8)
-                        enemy[#enemy - 1]:set_pos(leaf.vector(tpos.x - 8, tempy))
+                        enemy[#enemy + 1] = leaf.new_obj(
+                            
+                            obj.name  ,
+                            temp_x + 8,
+                            tpos.x - 8,
+                            leaf.vector(tpos.x - 8, temp_y),
+                            obj.clip
+                        )
 
                         invoke = false
                     end
@@ -411,6 +428,8 @@ end
                 end
             end
         end
+
+        return spawn, enemy
     end
 
     function leaf.draw_tilemap()
@@ -441,7 +460,7 @@ end
             spr.y * 8,
             8,
             8,
-            sres.blockd:getDimensions()
+            leaf.tiled:getDimensions()
         )
 
         leaf.mainground[name] = block:load(0)
@@ -455,8 +474,17 @@ end
 
     function leaf.del_tile(name)
 
-        leaf.mainground[name] = nil
-        leaf.del_plat(name)
+        if not name then
+        
+            leaf.mainground = {}
+            leaf.background = {}
+
+            leaf.del_plat()
+        else
+        
+            leaf.mainground[name] = nil
+            leaf.del_plat(name)
+        end
     end
 
 --# Platform -----------------------------------------------#--
@@ -474,6 +502,8 @@ end
 
     function platform:init(ipos, ctrl, def)
     
+        if not def then def = {} end
+
         -- Current position --
         self.pos = ipos
     
@@ -489,15 +519,10 @@ end
     --# Physics control ------------------------------------#--
     
         -- Screen collision --
-        self.scale = love.graphics.getWidth() / leaf.s_wdth
-
         self.d_col = leaf.vect4V(
         
-            0,
-            love.graphics.getWidth() / self.scale - 8,
-
-            0,
-            love.graphics.getHeight() / self.scale - 8
+            0, leaf.s_wdth - 4,
+            0, leaf.s_hght - 4
         )
         
         self.w_col = leaf.table_copy(self.d_col)
@@ -515,23 +540,15 @@ end
         self.jmp_stg = def.jump_strength or -200
 
         self.gravity = self.jmp_stg * (self.jmp_stg / (self.jmp_stg / 3.2))
-        self.maxfall = self.gravity * 0.5
+        self.maxfall = self.gravity * 0.4
         self.on_land = true
     end
 
     function platform:step(dt)
 
-        -- Reset collision paramters --
-        self.w_col   = leaf.table_copy(self.d_col)
-        self.on_land = false
-        
-        -- Give down key if is a playable object --
-        if type(self.ctrl.dwn) == "string" then
-            
-            leaf.coll(self.pos, self.w_col, leaf.btn(self.ctrl.dwn))
-    
-        else leaf.coll(self.pos, self.w_col, false) end
-    
+        -- Collision --
+        self:collide()
+
     --# Default control ------------------------------------#--
         
         if type(self.ctrl.lft) == "string" then
@@ -585,7 +602,7 @@ end
     
             self.pos.y = self.pos.y + self.y_speed * dt
 
-            -- Stop accelerating at 0.5 of the gravity speed --
+            -- Stop accelerating at 0.4 of the gravity speed --
             self.y_speed = self.y_speed - self.gravity * dt
             self.y_speed = math.max(self.y_speed, self.maxfall)
         end
@@ -605,9 +622,14 @@ end
             end
         end
 
+        -- Resset jumped boolean --
+        self.jmpd = false
+
         -- Jump if object is on floor and have no space to --
         if  leaf.btnp(self.ctrl.ups)
         and self:can_jmp() then
+
+            self.jmpd = true
 
             self.y_speed = (self.jmp_stg / 2) * leaf.SSCALE / 2
             self.jmp_cnt = false
@@ -620,19 +642,29 @@ end
         self.on_lw = false
     
         -- Avoid wall trhu --
-        platform.fix_pos(self)
+        self:fix_pos()
 
     --# Animation ------------------------------------------#--
 
         if self.anim then
             
             -- Jumping --
-            if self.y_speed < 0     then self.anim:play(dt, 0, self.clip.jump, 8, true)
-            elseif self.y_speed > 0 then self.anim:play(dt, 0, self.clip.fall, 8, true)
+            if self.y_speed < 0 then
+                
+                self.anim:play(dt, self.clip.jump, 8, true)
+            
+            elseif self.y_speed > 0 then
+                
+                self.anim:play(dt, self.clip.fall, 8, true)
 
             -- Walking and idle --
-            elseif self.state == 'moving' then self.anim:play(dt, 0, self.clip.walk, 8, true)
-            else self.anim:play(dt, 0, self.clip.idle, 8, true) end
+            elseif self.state == 'moving' then
+                
+                self.anim:play(dt, self.clip.walk, 8, true)
+            else
+                
+                self.anim:play(dt, self.clip.idle, 8, true)
+            end
         end
     end
 
@@ -642,38 +674,40 @@ end
         else leaf.rectb(self.pos.x, self.pos.y, 8) end
     end
 
+    function platform:collide()
+        
+        -- Reset collision paramters --
+        self.w_col   = leaf.table_copy(self.d_col)
+        self.on_land = false
+
+        -- Give down key if is a playable object --
+        if type(self.ctrl.dwn) == "string" then
+            
+            leaf.coll(self.pos, self.w_col, leaf.btn(self.ctrl.dwn))
+    
+        else leaf.coll(self.pos, self.w_col, false) end
+    end
+
     function platform:fix_pos()
 
-        local vect2d = self.pos
-        local limit  = self.w_col
+        local limit = self.w_col
 
         -- Keep object in window --
-        if vect2d.x < limit.lt then
+        if self.pos.x < limit.lt then
 
             self.on_lw = true
-            vect2d.x = limit.lt
+            self.pos.x = limit.lt
 
-        elseif vect2d.x > limit.rt then
+        elseif self.pos.x > limit.rt then
 
             self.on_rw = true
-            vect2d.x = limit.rt
-        end
-
-        -- Push object --
-        while vect2d.y < limit.up do
-            
-            vect2d.y = vect2d.y + 0.1
-        end
-
-        while vect2d.y > limit.dn do
-            
-            vect2d.y = vect2d.y - 0.1
+            self.pos.x = limit.rt
         end
     end
 
     function platform:get_pos(scale)
 
-        platform.fix_pos(self)
+        self:fix_pos()
     
         if not scale then scale = 1 end
     
@@ -686,8 +720,11 @@ end
     
     function platform:set_pos(npos)
     
+        -- Stop falling --
+        self.y_speed = 0
+    
         self.pos = npos
-        platform.fix_pos(self)
+        self:collide()
     end
     
     function platform:get_stt()
@@ -716,6 +753,11 @@ end
 
         return math.floor(self.pos.y) ~= self.w_col.up
         and jmp_cnt and self.on_land
+    end
+
+    function platform:jumped()
+        
+        return self.jmpd
     end
     
     function platform:on_wall()
@@ -750,11 +792,14 @@ end
         return other
     end
     
-    function ghost:init(min, max, clip)
+    function ghost:init(min, max, pos, clip)
     
+        -- Missing arg --
+        if not pos then pos = leaf.vector(0, 0) end
+
         -- Habitation Space --
-        self.dhab = {['lft'] = min, ['rgt'] = max} -- Default min and max
-        self.habt = {['lft'] = min, ['rgt'] = max} -- Current min and max
+        self.dhab = {lft = min, rgt = max} -- Default min and max
+        self.habt = {lft = min, rgt = max} -- Current min and max
     
         -- Ghost --
         self.thnk = {
@@ -764,13 +809,13 @@ end
             ['ups'] = false,
         }
     
-        self.plat = leaf.new_obj('platform', leaf.vector(17, 09, 8), self.thnk)
+        self.plat = leaf.new_obj('platform', pos, self.thnk)
         self.plat.x_speed = self.plat.x_speed * 0.6 -- Set speed at 60% of max
     
         -- Ghost animator --
         if clip then
 
-            self.anim = leaf.anim(leaf.vector(0, 1))
+            self.anim = leaf.anim(leaf.vector(clip.idle.row, clip.idle[0]))
         
             -- Ghost animations --
             self.anim.idle  = clip.idle
@@ -778,29 +823,42 @@ end
         end
     end
     
-    function ghost:update(dt, cpos)
-    
+    function ghost:step(dt, cpos)
+
         -- Update habitation space --
-        self.habs = leaf.table_copy(self.dhab)
-        ghost:think(cpos)
+        self.habt = leaf.table_copy(self.dhab)
+        self:think(dt, cpos)
     
-        self.plat:move(dt)
-        
+        self.plat:step(dt)
+
         -- If object has an animator --
         if self.anim then
         
             if self.thnk.furry > 0 then
             
-                self.anim:play(dt, 2, self.anim.angry, 8, true)
+                self.anim:play(dt, self.anim.angry, 8, true)
 
             else
             
-                self.anim:play(dt, 2, self.anim.idle, 8, true)
+                self.anim:play(dt, self.anim.idle, 8, true)
             end
         end
+
+        -- Ghost cought char --
+        local tpos = self.plat:get_pos()
+        if cpos.y <= tpos.y and cpos.y > tpos.y - 8 then
+            
+            if (cpos.x + 2 > tpos.x and cpos.x < tpos.x + 2)
+            or cpos.x == tpos.x then
+            
+                return true
+            
+            else return false end
+
+        else return false end
     end
     
-    function ghost:think(cpos)
+    function ghost:think(dt,cpos)
 
         local tpos = self.plat:get_pos()
 
@@ -808,7 +866,7 @@ end
         if not self.thnk.furry then self.thnk.furry = 0 end
     
         -- Object inside ghost's view range --
-        if cpos.y == tpos.y then self.thnk.furry = 120 * love.timer.getAverageDelta() end
+        if  cpos.y <= tpos.y and cpos.y > tpos.y - 8 then self.thnk.furry = 120 * dt end
         
         -- Object out of view range --
         if cpos.y > tpos.y then self.thnk.furry = 0 end
@@ -821,7 +879,7 @@ end
             self.habt.rgt = math.min(cpos.x, self.habt.rgt)
     
             -- Decrease furry level --
-            self.thnk.furry = self.thnk.furry - love.timer.getDelta()
+            self.thnk.furry = self.thnk.furry - dt
         end
     
         -- Move to left --
@@ -924,7 +982,7 @@ end
         self.quad = love.graphics.newQuad(frame.x * 8, frame.y * 8, 8, 8, leaf.sheet:getDimensions())
     end
     
-    function anim:play(dt, anim, frames, speed, loop)
+    function anim:play(dt, anim, speed, loop)
         
         -- Reset to a new animation --
         if self.afps ~= speed then self.reload = true end
@@ -933,11 +991,11 @@ end
             self.afps = speed
             self.timr = 1 / self.afps
     
-            self.cfrm = frames[0]
+            self.cfrm = anim[0]
             self.nfrm = -1
     
             -- Set the first frame --
-            self.quad:setViewport(self.cfrm * 8, anim * 8, 8, 8)
+            self.quad:setViewport(self.cfrm * 8, anim.row * 8, 8, 8)
     
             self.reload = false
         end
@@ -957,14 +1015,14 @@ end
             self.nfrm = self.nfrm + 1
     
             -- For Loop --
-            if self.nfrm > #frames and loop then self.nfrm = 0 end
-            if self.nfrm > #frames and not loop then return true end
+            if self.nfrm > #anim - 1 and loop then self.nfrm = 0 end
+            if self.nfrm > #anim - 1 and not loop then return true end
     
             -- Next frame --
-            self.cfrm = frames[self.nfrm]
+            self.cfrm = anim[self.nfrm]
     
             -- Update frame --
-            self.quad:setViewport(self.cfrm * 8, anim * 8, 8, 8)
+            self.quad:setViewport(self.cfrm * 8, anim.row * 8, 8, 8)
         end
     end
     
@@ -1094,18 +1152,24 @@ function leaf.new_obj(otype, ...)
     return object
 end
 
--- Screen configuration --
+local _w, _h, _s, _rz, _mw, _mh, _vs
 function leaf.init(w, h, s, rz, mw, mh, vs)
     
-    if rz == nil then rz = true end
-    if vs == nil then vs = true end
+    _w, _h, _s, _rz, _mw, _mh, _vs = w, h, s, rz, mw, mh, vs
+end
 
-    local min_w = w / s
-    local min_h = h / s
+-- Screen configuration --
+function leaf._init(w, h, s, mv, rz, mw, mh, vs)
+    
+    if rz == nil then rz = true  end
+    if vs == nil then vs = true  end
+
+    local min_w = w / (s * 2)
+    local min_h = h / (s * 2)
 
     leaf.SSCALE = s
-    leaf.s_wdth = love.graphics.getWidth() / s
-    leaf.s_hght = love.graphics.getWidth() / s
+    leaf.s_wdth = w / s
+    leaf.s_hght = h / s
 
     love.window.setMode(w, h, {
         
@@ -1117,6 +1181,9 @@ function leaf.init(w, h, s, rz, mw, mh, vs)
 
     -- Fix resolution --
     love.graphics.setDefaultFilter('nearest')
+
+    -- Mouse is visible --
+    if mv ~= nil then love.mouse.setVisible(mv) end
 
     -- Resources --
     if not leaf.skip_res then
@@ -1147,7 +1214,7 @@ function leaf.init(w, h, s, rz, mw, mh, vs)
     math.randomseed(os.time() + w * h)
 end
 
--- Skip functions --
+-- Skip components --
 function leaf.skip(...)
     
     local comps = {...}
@@ -1163,6 +1230,20 @@ leaf.texts = {}
 
 local random_offset = leaf.vector(0, 0)
 
+function leaf.popup(usr, msg)
+
+    local os_n = love.system.getOS()
+
+    if os_n == 'Windows' then
+
+        os.execute('msg ' .. usr .. ' ' .. msg)
+
+    elseif os_n == 'Linux' then
+    
+        os.execute('zenity --info --text="' .. msg .. '"')
+    end
+end
+
 function leaf.txt_conf(font, size, speed)
     
     font = love.graphics.newFont('resources/' .. font, size)
@@ -1175,6 +1256,23 @@ function leaf.new_txt(tmsg, ypos, effect, trigger, tgrTime)
 
     -- Avoid overlaping --
     if leaf.txt_exist(tmsg) then return end
+
+    -- Invalid arguments --
+    if not type(tmsg) == "string" then
+
+        assert('Attempt to create a text with a not-string message')
+    end
+
+    if not type(ypos) == "number" then
+
+        assert('Attempt to draw a text at a non-numeric position (ypos)')
+    end
+
+    if not type(effect) == "string" then
+
+        assert('Attempt to create a text with a invalid effect type')
+    end
+
 
     local t = {
 
@@ -1223,7 +1321,10 @@ function leaf.type_txt(dt, sound)
         if t.timer <= 0 then
 
             t.timer = 1 / t.cps
-            if t.ctext ~= t.msg then t.ctext = t.ctext .. t.msg:sub(#t.ctext + 1, #t.ctext + 1)
+            if t.ctext ~= t.msg then
+                
+                t.ctext = t.ctext .. t.msg:sub(#t.ctext + 1, #t.ctext + 1)
+
             else t.ended = true end
             
             -- Text sound --
@@ -1234,27 +1335,25 @@ end
 
 local function draw_text()
 
-    local r, g, b, a = love.graphics.getColor()
-
     for _, t in pairs(leaf.texts) do
 
         -- Draw effects --
         if t.efc == 'noises' then
 
-            love.graphics.setColor(0, 0, 1, 0.5)
+            leaf.set_col(0, 0, 255, 255/2)
             love.graphics.print(t.ctext, t.pos.x + (random_offset.x / 12), t.pos.y)
 
-            love.graphics.setColor(1, 0, 0, 0.5)
+            leaf.set_col(255, 0, 0, 255/2)
             love.graphics.print(t.ctext, t.pos.x - (random_offset.y / 12), t.pos.y)
         
         elseif t.efc == 'glitch' then end
 
         -- Draw main text --
-        love.graphics.setColor(1, 1, 1, 1)
+        leaf.set_col(255, 255, 255, 255)
         love.graphics.print(t.ctext, t.pos.x, t.pos.y)
     end
 
-    love.graphics.setColor(r, g, b, a)
+    leaf.set_col()
 end
 
 function leaf.txt_end(idxr)
@@ -1308,7 +1407,31 @@ function leaf.pop_txt()
     end
 end
 
+-- Resset color --
+local r, g, b, a
+
 -- Graphic functions --
+function leaf.set_col(nr, ng, nb, na)
+    
+    if not (nr and ng and nb and na) then
+
+        if r and g and b and a then
+        
+            love.graphics.setColor(r, g, b, a)
+            r, g, b, a = nil, nil, nil, nil
+        end
+    
+    else
+        
+        if not (r and g and b and a) then
+        
+            r, g, b, a = love.graphics.getColor()
+        end
+
+        love.graphics.setColor(nr/255, ng/255, nb/255, na/255)
+    end
+end
+
 function leaf.rect(x, y, w, h)
     
     love.graphics.rectangle('line', x, y, w or 1, h or w or 1)
@@ -1376,7 +1499,7 @@ function leaf.save_data(file, data, method, msg)
     if method == 'safe' then
         
         -- Create file or read it --
-        local line = msg or 'gamedata\n'
+        local line = msg .. '\n' or 'gamedata\n'
 
         -- Write every value in pairs --
         for idx, itm in pairs(data) do
@@ -1469,6 +1592,7 @@ function leaf.load_data(file, method)
             splt = leaf.string_split(itm, ':')
 
             -- Convert to correct data type --
+            if tonumber(splt[1]) then splt[1] = tonumber(splt[1]) end
             if tonumber(splt[2]) then splt[2] = tonumber(splt[2])
             elseif tobool(splt[2]) then splt[2] = tobool(splt[2]) end
 
@@ -1492,6 +1616,9 @@ end
 -- leaf workflow --
 function love.load()
     
+    -- Init sub internal initializer --
+    leaf._init(_w, _h, _s, _rz, _mw, _mh, _vs)
+    
     if leaf.load then leaf.load() end
 end
 
@@ -1501,9 +1628,9 @@ function love.update(dt)
     leaf.fps = love.timer.getFPS()
 
     -- Update Screen sizw --
-    leaf.s_wdth = love.graphics.getWidth() / leaf.SSCALE
-    leaf.s_hght = love.graphics.getWidth() / leaf.SSCALE
-    
+    leaf.s_wdth = love.graphics.getWidth()  / leaf.SSCALE
+    leaf.s_hght = love.graphics.getHeight() / leaf.SSCALE
+
     -- Leaf global step --
     if leaf.step then leaf.step(dt) end
     if leaf.late then leaf.late(dt) end
