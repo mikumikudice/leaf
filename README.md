@@ -126,7 +126,7 @@ Sraw all platforms.
 Add a collectable item at `ipos`, rendered with `sprt` (`vector`). Will be a solid tile if `wall` is `true`.
 
 - `leaf.catch(coll)`<br/>
-Destroy overlapped items by `call` and return item name if was caught.
+Destroy overlapped items by `call` (`vector`) and return item name if was caught.
 
 ## Tile map
 - `leaf.tilemap(main, back, info, obj)`<br/>
