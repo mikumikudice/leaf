@@ -83,7 +83,7 @@ Simple print all function.
 print `tag` followed by all subsequent values (`...`). e.g.
 
     ```lua
-    leaf.debug('debug', true, 4, 6 - 9, )
+    leaf.debug('debug', true, 4, 6 - 9)
     
     >>> [debug][true, 4, -3]
     ```
