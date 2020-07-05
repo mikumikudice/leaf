@@ -50,10 +50,10 @@ end
 
 Do not use love.load | update | draw, would replace the Leaf's functions. Instead, use leaf.load | step | draw.
 
-# API Referende
+# API Reference
 
-`leaf.init(w, h, s, rz, mw, mh, vs)` * Use after importing module. Sets the screen size (`w` x `h`), the drawing scale (`s`), resizeable
- option (`rz`), the min screen size (`mw` x `mh`) and enabled state of vsync (`vs`). Default values: s = 1, rz = true, mw/mh = s * 2, vs = true.
+`leaf.init(w, h, s, rz, mw, mh, vs)` * Use after importing module. Sets the screen size (`w` x `h`), the drawing scale (`s`), if the screen is resizeable
+  (`rz`), the min screen size (`mw` x `mh`) and if vsync is enabled (`vs`). Default values: s = 1, rz = true, mw/mh = s * 2, vs = true.
  
  `leaf.load` : Works like `love.load`.<br/>
  `leaf.step` : Works like `love.update`.<br/>
@@ -69,9 +69,9 @@ Do not use love.load | update | draw, would replace the Leaf's functions. Instea
 `leaf.vect4D(lt, rt, up, dn)` return a 4dir vector with values left (`lt`), right (`rt`), up (`up`) and down (`dn`).<br/>
 
 ## Global colliders
-`leaf.add_plat(type, pos, wdt, hgt, name)` add a new platform of the type `type` (`'solid'`, `'jthru'`) and the size `wdt` x `hgt` at `pos` (`vector`), identified by `name`.
+`leaf.add_plat(type, pos, wdt, hgt, name)` add a new platform of the type `type` (`'solid'` or `'jthru'`) of size `wdt` x `hgt` at `pos` (`vector`), identified by `name`.
 
-`leaf.coll(pos, coll, down)` update `coll` (`vect4D`) with all solid walls near `pos`. Skips the floor if the platform is `jthru` and `down` is true.
+`leaf.coll(pos, coll, down)` update `coll` (`vect4D`) with all solid walls near `pos`. Ignore the floor (`coll.dn`) if the platform is `jthru` and `down` is true.
 
 `leaf.del_plat(name)` delete the `name` platform.<br/>
 `leaf.draw_plat()` draw all platforms.<br/>
@@ -82,7 +82,7 @@ Do not use love.load | update | draw, would replace the Leaf's functions. Instea
 `leaf.catch(coll)` destroy overlapped items by `call` and return item name if was caught.
 
 ## Tile map
-`leaf.tilemap(main, back, info, obj)` set the current tile map.
+`leaf.tilemap(main, back, info, obj)` set the tile map of the game.
     
   `main` table with the tiles of the main layer.<br/>
   `back` table with tiles at the background (not solid).<br/>
@@ -92,15 +92,15 @@ Do not use love.load | update | draw, would replace the Leaf's functions. Instea
   
         info = {
         
-            dict = {
+            dict = { -- dictionary of sprites corresponding to each character
                 
                 ['O'] = leaf.vect(00, 00),
                 ['='] = leaf.vect(00, 01),
                 ['x'] = leaf.vect(64, 64),
             },
             
-            thru = {'='},
-            skip = {'x'},
+            thru = {'='}, -- dictionary of Jump Thru platforms
+            skip = {'x'}, -- dictionary of tiles to be ignored
         }
         
         main = {
@@ -135,9 +135,8 @@ Do not use love.load | update | draw, would replace the Leaf's functions. Instea
         
         leaf.tilemap(main, back, info, obj)
         
-This code will create a tile map 6 x 6, where `O` is an solid tile with an sprite at `0` x `0` in the `tilemap.png` file (see Resources), `=` is an Jump Thru platform with an sprite at `0` x `1`. An enemy, definided by `obj` will be spawned at {`4`, `1`} and will habitate the area `0` to `4`. The function will also return a character spawn position, at {`1.4`, `2.4`} (the `@` char plus 0.4).
+This code will create a tile map 6 x 6, where `O` is an solid tile with an sprite at `0` x `0` in the `tilemap.png` file (see Resources), `=` is an Jump Thru platform with an sprite at `0` x `1` (the `x` will be ignored in `main`). An enemy, definided by `obj` will be spawned at {`4`, `1`} and will habitate the area `0` to `4`. The function will also return a character spawn position, at {`1.4`, `2.4`} (the `@` char plus 0.4).
 
-`leaf.add_tile(name, spos, sprt, wall)` add an tile with the indexer `name` at `sois` (`vector`) rendered with sprt (`vector`). If `wall` is true, the tile will be solid.
+`leaf.add_tile(name, spos, sprt, wall)` add an tile with the indexer `name` at `spos` (`vector`) rendered with `sprt` (`vector`). If `wall` is true, the tile will be solid.
 
 `leaf.del_tile(name)` delete the `name` tile.
-        
