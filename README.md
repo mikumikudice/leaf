@@ -80,7 +80,7 @@ The current game screen Height (real size / scale).
 Simple print all function.
 
 - `leaf.debug(tag, ...)`<br/>
-print `tag` fallowed by all subsequent values after it (`...`). e.g.
+print `tag` followed by all subsequent values (`...`). e.g.
 
     ```lua
     leaf.debug('debug', true, 4, 6 - 9, )
