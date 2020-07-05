@@ -76,6 +76,18 @@ The current game screen width (real size / scale).
 - `leaf.s_hght`<br/>
 The current game screen Height (real size / scale).
 
+## Debug
+Simple print all function.
+
+- `leaf.debug(tag, ...)`<br/>
+print `tag` fallowed by all subsequent values after it (`...`). e.g.
+
+    ```lua
+    leaf.debug('debug', true, 4, 6 - 9, )
+    
+    >>> [debug][true, 4, -3]
+    ```
+
 ## Input
 - ESC key<br/>
 Quit the application.
