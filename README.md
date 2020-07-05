@@ -77,6 +77,9 @@ The current game screen width (real size / scale).
 The current game screen Height (real size / scale).
 
 ## Input
+- ESC key<br/>
+Quit the application.
+
 - `leaf.btn(key)`<br/>
 Return `true` if `key` is pressed, otherwise return `false`.
 
