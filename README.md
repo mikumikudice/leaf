@@ -1,6 +1,6 @@
 # <img src="icon.png">
 
-**leaf** (Love's Extensions And Facilities) is collection of libraries and classes for LÖVE. The structure of code and name of functions is entirely based on [ [Pyxel](https://github.com/kitao/pyxel)] by Kitao.
+**leaf** (Love's Extensions And Facilities) is collection of libraries and classes for LÖVE. The structure of code and name of functions is entirely based on [[Pyxel](https://github.com/kitao/pyxel)] by Kitao.
 
 leaf is open source and free to use.
 
@@ -53,7 +53,7 @@ Do not use love.load | update | draw, would replace the Leaf's functions. Instea
 # API Reference
 
 -`leaf.init(w, h, s, rz, mw, mh, vs)`<br/>
-Set the screen size (`w` x `h`), the drawing scale (`s`), if the screen is resizeable (`rz`), the min screen size (`mw` x `mh`) and if vsync is enabled (`vs`). Default values: s = 1, rz = true, mw/mh = s * 2, vs = true.
+Set the screen size (`w` x `h`), the drawing scale (`s`), if the screen is resizeable (`rz`), the min screen size (`mw` x `mh`) and if vsync is enabled (`vs`). Default values: `s = 1, rz = true, mw | mh = s * 2, vs = true`.
  
  - `leaf.load` <br/>
  Works like `love.load`.
@@ -98,7 +98,7 @@ Return a 4dir vector with values left (`lt`), right (`rt`), up (`up`) and down (
 Add a new platform of the type `type` (`'solid'` or `'jthru'`) of size `wdt` x `hgt` at `pos` (`vector`), identified by `name`.
 
 - `leaf.coll(pos, coll, down)`<br/>
-Update `coll` (`vect4D`) with all solid walls near `pos`. Ignore the floor (`coll.dn`) if the platform is `jthru` and `down` is true.
+Update `coll` (`vect4D`) with all solid walls near `pos`. Ignore the floor (`coll.dn`) if the platform is `jthru` and `down` is `true`.
 
 - `leaf.del_plat(name)`<br/>
 delete the `name` platform.
@@ -108,7 +108,7 @@ Sraw all platforms.
 
 ## Collectable items
 - `leaf.add_itm(name, ipos, sprt, wall)`<br/>
-Add a collectable item at `ipos`, rendered with `sprt` (`vector`). Will be a solid tile if `wall` is true.
+Add a collectable item at `ipos`, rendered with `sprt` (`vector`). Will be a solid tile if `wall` is `true`.
 
 - `leaf.catch(coll)`<br/>
 Destroy overlapped items by `call` and return item name if was caught.
