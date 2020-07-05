@@ -983,16 +983,17 @@ end
     end
     
     function anim:play(dt, anim, speed, loop)
-        
+
         -- Reset to a new animation --
-        if self.afps ~= speed then self.reload = true end
+        if self.canm ~= anim.name then self.reload = true end
         if self.reload then
     
+            self.canm = anim.name
             self.afps = speed
             self.timr = 1 / self.afps
     
             self.cfrm = anim[0]
-            self.nfrm = -1
+            self.nfrm = 0
     
             -- Set the first frame --
             self.quad:setViewport(self.cfrm * 8, anim.row * 8, 8, 8)
@@ -1013,14 +1014,14 @@ end
             self.timr = 1 / self.afps
     
             self.nfrm = self.nfrm + 1
-    
+
             -- For Loop --
-            if self.nfrm > #anim - 1 and loop then self.nfrm = 0 end
-            if self.nfrm > #anim - 1 and not loop then return true end
+            if self.nfrm > anim.count - 1 and loop then self.nfrm = 0 end
+            if self.nfrm > anim.count - 1 and not loop then return true end
     
             -- Next frame --
             self.cfrm = anim[self.nfrm]
-    
+
             -- Update frame --
             self.quad:setViewport(self.cfrm * 8, anim.row * 8, 8, 8)
         end
@@ -1043,6 +1044,78 @@ end
         out:init(ifrm)
 
         return out
+    end
+
+    -- Animation Source --
+    local function default(name, rw, fx, lx, op)
+        
+        fx = fx or 0
+        lx = lx or fx
+
+        local src = {}
+
+        -- Frames --
+        for a = 0, lx - fx do
+            
+            src[a] = fx + a
+        end
+
+        -- Optional frames --
+        if op then 
+            
+            for i = #src, #src + op[1] do
+                
+                src[i] = op[2]
+            end
+        end
+
+        -- Frame count --
+        src.count = #src
+
+        -- Animation row --
+        src.row = rw or 0
+        
+        -- Animation --
+        src.name = name
+
+        return src
+    end
+
+    local function stepped(name, rw, fx, mx, lx)
+        
+        fx = fx or 1
+        mx = mx or fx - 1
+        lx = lx or fx + 1
+
+        local src = {[0] = fx, [1] = mx, [2] = lx, [3] = mx}
+
+        -- Frame count --
+        src.count = 4
+
+        -- Animation row --
+        src.row = rw or 0
+
+        -- Animation --
+        src.name = name
+
+        return src
+    end
+
+    function leaf.asrc(name, ...)
+        
+        local src
+
+        if name:sub(1, 4) == 'stp-' then
+
+            src = stepped(name, ...)
+
+        elseif name:sub(1, 4) == 'def-' then
+
+            src = default(name, ...)
+        
+        else src = default(name, ...) end
+
+        return src
     end
 
 --# Gramophone ---------------------------------------------#--
