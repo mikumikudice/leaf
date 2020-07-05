@@ -215,7 +215,7 @@ end
 
     leaf.items = {}
 
-    function leaf.add_itm(name, ipos, sprt, wll)
+    function leaf.add_itm(name, ipos, sprt, wall)
 
         local itm = {
     
@@ -229,7 +229,7 @@ end
         }
     
         leaf.items[name] = itm
-        leaf.add_tile(name, ipos, sprt, wll)
+        leaf.add_tile(name, ipos, sprt, wall)
     end
     
     function leaf.catch(coll)
@@ -452,12 +452,12 @@ end
         end
     end
 
-    function leaf.add_tile(name, spos, spr, wll)
+    function leaf.add_tile(name, spos, sprt, wall)
 
         local spr = love.graphics.newQuad(
             
-            spr.x * 8,
-            spr.y * 8,
+            sprt.x * 8,
+            sprt.y * 8,
             8,
             8,
             leaf.tiled:getDimensions()
@@ -466,7 +466,7 @@ end
         leaf.mainground[name] = block:load(0)
         leaf.mainground[name]:init(spos, spr)
 
-        if wll == true then
+        if wall then
             
             leaf.add_plat('solid', spos, 8, 8, name)
         end
@@ -1225,24 +1225,25 @@ function leaf.new_obj(otype, ...)
     return object
 end
 
-local _w, _h, _s, _rz, _mw, _mh, _vs
+local ldd, _w, _h, _s, _rz, _mw, _mh, _vs
 function leaf.init(w, h, s, rz, mw, mh, vs)
     
     _w, _h, _s, _rz, _mw, _mh, _vs = w, h, s, rz, mw, mh, vs
+    ldd = true
 end
 
 -- Screen configuration --
 function leaf._init(w, h, s, mv, rz, mw, mh, vs)
     
-    if rz == nil then rz = true  end
-    if vs == nil then vs = true  end
+    if rz == nil then rz = true end
+    if vs == nil then vs = true end
 
     local min_w = w / (s * 2)
     local min_h = h / (s * 2)
 
-    leaf.SSCALE = s
-    leaf.s_wdth = w / s
-    leaf.s_hght = h / s
+    leaf.SSCALE = s or 1
+    leaf.s_wdth = w / leaf.SSCALE
+    leaf.s_hght = h / leaf.SSCALE
 
     love.window.setMode(w, h, {
         
@@ -1690,8 +1691,13 @@ end
 function love.load()
     
     -- Init sub internal initializer --
-    leaf._init(_w, _h, _s, _rz, _mw, _mh, _vs)
+    if ldd then
+        
+        leaf._init(_w, _h, _s, _rz, _mw, _mh, _vs)
     
+    -- If not called, replace sub with main --
+    else leaf.init = leaf._init end
+
     if leaf.load then leaf.load() end
 end
 
@@ -1706,7 +1712,7 @@ function love.update(dt)
 
     -- Leaf global step --
     if leaf.step then leaf.step(dt) end
-    if leaf.late then leaf.late(dt) end
+    if leaf.late then leaf.late()   end
 
     -- Clear inputs --
     if leaf.inputs.prss and leaf.inputs.prss ~= '' and
