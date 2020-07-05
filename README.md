@@ -132,7 +132,7 @@ Set the tile map of the game.
             ['='] = leaf.vect(00, 01),
             ['x'] = leaf.vect(00, 04),
             
-            nil = leaf.vect(64, 64) -- Default sprite to unknow characters
+            ['nil'] = leaf.vect(64, 64) -- Default sprite to unknow characters
         },
 
         thru = {'='}, -- dictionary of Jump Thru platforms
