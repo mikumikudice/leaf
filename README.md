@@ -339,8 +339,8 @@ Platform Packman-like enemy. Runs the area from `min` to `max`, but is instantia
 clip = {
     
     -- Same name to change only sprites --
-    idle  = leaf.asrc('idle', 2, 0, 04),
-    angry = leaf.asrc('idle', 2, 5, 10),
+    idle  = leaf.asrc('idle', 2, 0, 4),
+    angry = leaf.asrc('idle', 2, 5, 9),
 }
 
 ghost = leaf.new_obj('pm-ghost', 0, 32, leaf.vector(), clip)
