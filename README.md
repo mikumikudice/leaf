@@ -264,8 +264,8 @@ Return a platform object of the `otype`.
 
 * Functions common to all platform types.
 
-- `platform:step(dt)`<br/>
-Update `platform` object (moviment, collision, animaiton).
+- `platform:step(dt, [cpos])`<br/>
+Update `platform` object (moviment, collision, animaiton). If `platform` is an `pm-ghost`, the object will haunt the `cpos` position (`vector`). 
 
 - `platform:draw()`<br/>
 Draw `platform` object. If object has no animator, a rectangle will be drawn instead.
