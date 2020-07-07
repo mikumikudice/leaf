@@ -84,17 +84,17 @@ Returns `idx, itm` of the first item in `lst`.
 Returns `idx, itm` of the last item in `lst`.
 
 - `leaf.table_find(lst, itm)`<br/>
-Returns the index of the `itm` if it is in `lst`, otherwise return `nil`.
+Returns the index of the `itm` if it is in `lst`, otherwise returns `nil`.
 
 - `leaf.table_eq(lst, otr)`<br/>
-Returns `true` if `lst` has the same items in the same indexes of `otr`, otherwise return `false`.
+Returns `true` if `lst` has the same items in the same indexes of `otr`, otherwise returns `false`.
 
 - `leaf.table_eq(lst)`<br/>
 Returns an copy of `lst`.
 
 ## String
 - `leaf.string_split(str, pat)`<br/>
-Returns a table of substrings splited by `pat` from `str`, return `str` if doesn't find `pat`.
+Returns a table of substrings splited by `pat` from `str`, returns `str` if doesn't find `pat`.
 
 ## Bool
 - `leaf.tobool(str, pat)`<br/>
@@ -117,7 +117,7 @@ prints `tag` followed by all subsequent values (`...`). e.g.
 Creates a pop-up window to `usr` with `msg` as content. (Avaliable only on Windows and Linux).
 
 - `leaf.set_col([r, g, b, [a]])`<br/>
-Same of `love.graphics.setColor()`, but uses 0 to 255 scale, and all `a` is optional. If empty, resset the color to default.
+Same of `love.graphics.setColor()`, but it uses 0 to 255 scale, and `a` is optional. If empty, resset the color to default.
 
 - `leaf.rect(x, y, [w], [h])`<br/>
 Draws an `w` x `h` rectangle (line draw method) at {`x`, `y`}. If `w` is `nil`, `w` and `h` will be `1`, if only `h` is `nil`, `h` will be `w`.
@@ -130,13 +130,13 @@ Draws an `w` x `h` rectangle (fill draw method) at {`x`, `y`}. If `w` is `nil`, 
 Quits the application.
 
 - `leaf.btn(key)`<br/>
-Returns `true` if `key` is pressed, otherwise return `false`.
+Returns `true` if `key` is pressed, otherwise returns `false`.
 
 - `leaf.btnp(key)`<br/>
-Returns `true` if `key` is pressed at that frame, otherwise return `false`.
+Returns `true` if `key` is pressed at that frame, otherwise returns `false`.
 
 - `leaf.btnr(key)`<br/>
-Returns `true` if `key` is released at that frame, otherwise return `false`.
+Returns `true` if `key` is released at that frame, otherwise returns `false`.
 
 ## Text Class
 - `leaf.txt_conf(font, size, speed)`<br/>
