@@ -48,7 +48,7 @@ function leaf.draw()
 end
 ```
 
-Do not use love.load | update | draw, would replace the Leaf's functions. Instead, use leaf.load | step | draw.
+Do not use love.load | update | draw, it would override the Leaf's functions. Instead, use leaf.load | step | draw.
 
 # API Reference
 
