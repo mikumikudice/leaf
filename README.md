@@ -23,7 +23,7 @@ leaf is open source and free to use.
 
 ## How to Use
 
-leaf is a single lua file that can be loaded by ``require`` or ``dofile`` functions.
+leaf is a single lua file that can be loaded by the `require` or `dofile` functions.
 
 ```lua
 require 'leaf'
