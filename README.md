@@ -52,7 +52,7 @@ Do not use love.load | update | draw, it would override the Leaf's functions. In
 
 # API Reference
 
--`leaf.init(w, h, s, rz, mw, mh, vs)`<br/>
+-`leaf.init(w, h, [s, rz, mw, mh, vs])`<br/>
 Sets the screen size (`w` x `h`), the drawing scale (`s`), if the screen is resizeable (`rz`), the min screen size (`mw` x `mh`) and if vsync is enabled (`vs`). Default values: `s = 1, rz = true, mw | mh = s * 2, vs = true`.
  
  - `leaf.load` <br/>
