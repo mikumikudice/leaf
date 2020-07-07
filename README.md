@@ -404,7 +404,7 @@ Saves a file named `file` containing the data of `data` (string, number or table
    Standart method. Save all data inside a .lua file.
 
    * `method = 'safe'`<br/>
-   Magic method. Saves the file as a `file` and store the data in a slightly difficult way to change it. It usually causes errors of nullity if done (not sure why). It also adds `msg` as a message at the top of the file.
+   Magic method. Saves the file as `file` and store the data in a slightly difficult way to change it. It usually causes errors of nullity if done (not sure why). It also adds `msg` as a message at the top of the file.
    
 - `leaf.load_data(file, method)`<br/>
 Returns the content of `file`. If an method was used to save the file, it must be specified with `method`.
