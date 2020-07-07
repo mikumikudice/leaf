@@ -145,7 +145,7 @@ Sets the default font as `font`, at size `size` and the class will tye 1 letter 
 - `leaf.new_txt(tmsg, ypos, [effect], [trigger, tgrTime])`<br/>
 Adds a new text object, that will be drawed at height `ypos` and alligned at center (acording to the size). Better with monospace fonts. If `trigger` is definided (a `table` with the letter positions) the text will wait `1/tgrTime` seconds before continue. If this text object already exists, nothing happens.
 
-* `effect = 'noises'` : will draw some red and blue shadows behind the text.
+   * `effect = 'noises'` : will draw some red and blue shadows behind the text.
 
 - `leaf.type_txt(dt, [sound])`<br/>
 Updates all text objects, playing the tape `sound` if given (See Gramophone).
