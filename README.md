@@ -106,12 +106,12 @@ Simple print all function.
 - `leaf.debug(tag, [...])`<br/>
 prints `tag` followed by all subsequent values (`...`). e.g.
 
-    ```lua
-    leaf.debug('debug', true, 4, 6 - 9)
-    
-    >>> [debug][true, 4, -3]
-    ```
+```lua
+leaf.debug('debug', true, 4, 6 - 9)
 
+>>> [debug][true, 4, -3]
+```
+    
 ## Graphics
 - `leaf.popup(usr, msg)`<br/>
 Creates a pop-up window to `usr` with `msg` as content. (Avaliable only on Windows and Linux).
@@ -166,10 +166,10 @@ Removes all text objects that has ended.
 
 ## 2D Vectors
 - `leaf.vector([x], [y], [s])`<br/>
-Returns a new 2D vector at {`x`, `y`} with optional scale (`s`). If empty, return a {`0`, `0`} vector.
+Returns a new 2D vector at {`x`, `y`} with optional scale (`s`). If empty, returns a {`0`, `0`} vector.
 
 - `leaf.vect4D([lt], [rt], [up], [dn])`<br/>
-Returns a 4dir vector with values left (`lt`), right (`rt`), up (`up`) and down (`dn`). If empty, return all values as `0`.
+Returns a 4dir vector with values left (`lt`), right (`rt`), up (`up`) and down (`dn`). If empty, returns all values as `0`.
 
 ## Global colliders
 - `leaf.add_plat(type, pos, wdt, hgt, name)`<br/>
@@ -189,7 +189,7 @@ Draws all platforms.
 Adds a collectable item at `ipos`, rendered with `sprt` (`vector`). Will be a solid tile if `wall` is `true`.
 
 - `leaf.catch(coll)`<br/>
-Destroys overlapped items by `call` (`vector`) and return item name if was caught.
+Destroys overlapped items by `call` (`vector`) and returns item name if was caught.
 
 ## Tile map
 - `leaf.tilemap(main, back, info, [obj])`<br/>
@@ -250,7 +250,7 @@ obj = {
 leaf.tilemap(main, back, info, obj)
 ```
 
-This code will create a tile map 6 x 6, where `O` is an solid tile with an sprite at `0` x `0` in the `tilemap.png` file (see Resources), `=` is an Jump Thru platform with an sprite at `0` x `1` (the `x` will be ignored in `main`). An enemy, definided by `obj` will be spawned at {`4`, `1`} and will habitate the area `0` to `4`. The function will also return a character spawn position, at {`1.4`, `2.4`} (the `@` char plus 0.4).
+This code will create a tile map 6 x 6, where `O` is an solid tile with an sprite at `0` x `0` in the `tilemap.png` file (see Resources), `=` is an Jump Thru platform with an sprite at `0` x `1` (the `x` will be ignored in `main`). An enemy, definided by `obj` will be spawned at {`4`, `1`} and will habitate the area `0` to `4`. The function will also return a character spawn position, at {`1.4`, `2.4`} (the `@` char position plus 0.4).
 
 - `leaf.add_tile(name, spos, sprt, wall)`<br/>
 Adds an tile with the indexer `name` at `spos` (`vector`) rendered with `sprt` (`vector`). If `wall` is true, the tile will be solid.
