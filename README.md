@@ -168,6 +168,18 @@ Removes all text objects that has ended.
 - `leaf.vector([x], [y], [s])`<br/>
 Returns a new 2D vector at {`x`, `y`} with optional scale (`s`). If empty, returns a {`0`, `0`} vector.
 
+   - `vector:sum([x], [y])`<br/>
+   Sums `x` (or `0`) and `y` (or `0`) to the vector. Returns itself.
+
+   - `vector:sub([x], [y])`<br/>
+   Subtracts `x` (or `0`) and `y` (or `0`) from the vector. Returns itself.
+
+   - `vector:mul([x], [y])`<br/>
+   Multiplies `vector.x` by `x` (or `1`) and `vector.y` by `y` (or `1`). Returns itself.
+
+   - `vector:mul([x], [y])`<br/>
+   Divides `vector.x` by `x` (or `1`) and `vector.y` by `y` (or `1`). Returns itself.
+
 - `leaf.vect4D([lt], [rt], [up], [dn])`<br/>
 Returns a 4dir vector with values left (`lt`), right (`rt`), up (`up`) and down (`dn`). If empty, returns all values as `0`.
 
