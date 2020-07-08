@@ -4,11 +4,23 @@ leaf = {}
 function leaf.debug(tag, ...)
     
     local arg = {...}
-    
+
+    if type(tag) == 'table' then
+        
+        if tag.lot then
+            
+            tag = tag:str()
+        end
+    end
+
     -- Make all arguments strings --
     for i, a in pairs(arg) do
         
-        arg[i] = tostring(a)
+        if a.lot then
+
+            arg[i] = a:str()
+
+        else arg[i] = tostring(a) end
     end
 
     -- Concat arguments --
@@ -110,6 +122,46 @@ end
     function leaf.vector(x, y, scale)
         
         return {
+
+            lot = 'vector',
+
+            str = function(self)
+                
+                return '{' .. (self.x)
+                .. ', ' .. (self.y) .. '}'
+            end,
+
+            sum = function(self, x, y)
+                
+                self.x = self.x + (x or 0)
+                self.y = self.y + (y or 0)
+
+                return self
+            end,
+
+            sub = function(self, x, y)
+                
+                self.x = self.x - (x or 0)
+                self.y = self.y - (y or 0)
+
+                return self
+            end,
+
+            mul = function(self, x, y)
+                
+                self.x = self.x * (x or 1)
+                self.y = self.y * (y or 1)
+
+                return self
+            end,
+
+            div = function(self, x, y)
+                
+                self.x = self.x / (x or 1)
+                self.y = self.y / (y or 1)
+
+                return self
+            end,
 
             x = (x or 0) * (scale or 1),
             y = (y or 0) * (scale or 1),
@@ -327,8 +379,8 @@ end
                 local tpos = leaf.vector(tx - 1, ty, 8)
                 local sprt = love.graphics.newQuad(
 
-                    this.x * 8,
-                    this.y * 8,
+                    this.x,
+                    this.y,
                     8,
                     8,
                     leaf.tiled:getDimensions()
@@ -377,15 +429,12 @@ end
                 if not this then this = _dict['nil'] end
 
                 -- Set position --
-                local tpos = leaf.vector((tx - 1) * 8, ty * 8)
+                local tpos = leaf.vector((tx - 1), ty, 8)
 
                 -- Spawn point --
                 if tile == '@' then
                     
-                    spawn = leaf.table_copy(tpos)
-
-                    spawn.x = spawn.x + 4
-                    spawn.y = spawn.y + 4
+                    spawn = leaf.table_copy(tpos):sum(4, 4)
 
                 elseif tile == '#' then
 
@@ -415,8 +464,8 @@ end
                     -- Create quad --
                     local sprt = love.graphics.newQuad(
 
-                        this.x * 8,
-                        this.y * 8,
+                        this.x,
+                        this.y,
                         8,
                         8,
                         leaf.tiled:getDimensions()
@@ -456,8 +505,8 @@ end
 
         local spr = love.graphics.newQuad(
             
-            sprt.x * 8,
-            sprt.y * 8,
+            sprt.x,
+            sprt.y,
             8,
             8,
             leaf.tiled:getDimensions()
