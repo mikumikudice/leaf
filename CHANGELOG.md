@@ -1,3 +1,7 @@
+### 1.0.3
+\+ PM-Ghost new behaviour
+\- Gramophone syntax error
+
 ### 1.0.2
 \+ Added leaf.ansrc (Animation Source) function
 
