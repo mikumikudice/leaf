@@ -858,7 +858,7 @@ end
         else return false end
     end
     
-    function ghost:think(dt,cpos)
+    function ghost:think(dt, cpos)
 
         local tpos = self.plat:get_pos()
 
@@ -883,17 +883,24 @@ end
         end
     
         -- Move to left --
-        if tpos.x >= self.habt.rgt then
+        if tpos.x > self.habt.rgt then
     
             self.thnk.rgt = false
             self.thnk.lft = true
         end
     
         -- Move to rught --
-        if tpos.x <= self.habt.lft then
+        if tpos.x < self.habt.lft then
     
             self.thnk.lft = false
             self.thnk.rgt = true
+        end
+
+        -- Beat at wall --
+        if self.plat:on_wall() then
+            
+            self.thnk.lft = not self.thnk.lft
+            self.thnk.rgt = not self.thnk.rgt
         end
     
         -- Do not get crazy --
@@ -1034,6 +1041,11 @@ end
     
     function anim:draw(pos, side)
 
+        if math.abs(side) > 1 then
+            
+            side = 1 * (math.abs(side) / side)
+        end
+
         local xoff = math.min(math.min(8 * side, 8), 0)
         love.graphics.draw(leaf.sheet, self.quad, pos.x - xoff, pos.y, 0, side, 1)
     end
@@ -1130,15 +1142,47 @@ end
             leaf.tapes[#leaf.tapes] = track
         end
 
-        leaf.tapes.main = main
-        leaf.tapes.back = back
+        leaf.tapes.main = love.audio.newSource('tracks/' .. main, 'stream')
+        leaf.tapes.back = love.audio.newSource('tracks/' .. back, 'stream')
     end
 
     local gramophone = {}
 
+    function gramophone.theme()
+
+        leaf.tapes.main:setLooping(true)
+        leaf.tapes.main:play()
+    
+        leaf.tapes.back:setLooping(true)
+        leaf.tapes.back:play()
+    end
+
+    function gramophone.set(thm, stt)
+        
+        if thm == 'main' then
+
+            if stt then leaf.tapes.main:resume()
+            else leaf.tapes.main:pause() end
+        end
+
+        if thm == 'back' then
+
+            if stt then leaf.tapes.back:resume()
+            else leaf.tapes.back:pause() end
+        end
+    end
+
     function gramophone.play(tape, track, loop)
         
+        if loop == nil then loop = false end
+
+        -- 1 ... 7 tracks --
+        track = math.min(math.max(track, 0), 7)
+
         leaf.disco[track] = love.audio.newSource(leaf.tapes[tape], 'static')
+        leaf.tapes.main:setLooping(loop)
+
+        leaf.disco[track]:setVolume(track / 7)
         leaf.disco[track]:play()
     end
 
@@ -1154,10 +1198,7 @@ end
         leaf.disco[track]:resume()
     end
     
-    function gramophone.fade_in(track, speed, max)
-    
-        -- Do not explode --
-        if not max then max = 10 end
+    function gramophone.fade_in(track, speed)
 
         -- Make speed/s as speed/dt
         speed = (speed * love.timer.getDelta()) / love.timer.getFPS()
@@ -1172,9 +1213,9 @@ end
             end
 
             -- While not at max --
-            if leaf.disco[track].fade < max then
+            if leaf.disco[track].fade < 1 then
             
-                local volume = math.min(leaf.disco[track].fade + speed, max)
+                local volume = math.min(leaf.disco[track].fade + speed, 1)
 
                 leaf.disco[track]:setVolume(valume)
                 leaf.disco[track].fade = leaf.disco[track]:getVolume()
@@ -1182,11 +1223,14 @@ end
             -- Clear fade at the end --
             else leaf.disco[track].fade = nil end
 
-        else return end
+        else leaf.disco[track].fade = leaf.disco[track]:getVolume() end
     end
 
     function gramophone.fadeout(track, speed)
     
+        -- Make speed/s as speed/dt
+        speed = (speed * love.timer.getDelta()) / love.timer.getFPS()
+
         if not leaf.disco[track] then return end
         if not leaf.disco[track].fade then
         
@@ -1302,7 +1346,7 @@ end
 -- Text type --
 leaf.texts = {}
 
-local random_offset = leaf.vector(0, 0)
+local random_offset = leaf.vector()
 
 function leaf.popup(usr, msg)
 
@@ -1323,6 +1367,7 @@ function leaf.txt_conf(font, size, speed)
     font = love.graphics.newFont('resources/' .. font, size)
     love.graphics.setFont(font)
 
+    leaf.lttr_size  = size - size / 2
     leaf.text_speed = speed
 end
 
@@ -1384,7 +1429,7 @@ function leaf.type_txt(dt, sound)
         else t.cps = t.speed end
 
         -- Set the midle position --
-        t.pos.x = leaf.s_wdth / 2 - (#t.ctext * 12) / 2
+        t.pos.x = leaf.s_wdth / 2 - (#t.ctext * leaf.lttr_size) / 2
 
         -- If isn't too slow --
         if dt > 0.035 then return end
@@ -1430,17 +1475,6 @@ local function draw_text()
     leaf.set_col()
 end
 
-function leaf.txt_end(idxr)
-    
-    for i, t in pairs(leaf.texts) do
-        
-        if t.msg == idxr then
-            
-            return t.ended
-        end
-    end
-end
-
 function leaf.txt_exist(idxr)
     
     for i, t in pairs(leaf.texts) do
@@ -1452,6 +1486,17 @@ function leaf.txt_exist(idxr)
     end
 
     return false
+end
+
+function leaf.txt_end(idxr)
+    
+    for i, t in pairs(leaf.texts) do
+        
+        if t.msg == idxr then
+            
+            return t.ended
+        end
+    end
 end
 
 function leaf.del_txt(idxr)
@@ -1502,7 +1547,7 @@ function leaf.set_col(nr, ng, nb, na)
             r, g, b, a = love.graphics.getColor()
         end
 
-        love.graphics.setColor(nr/255, ng/255, nb/255, na/255)
+        love.graphics.setColor(nr/255, ng/255, nb/255, (na or 255)/255)
     end
 end
 
