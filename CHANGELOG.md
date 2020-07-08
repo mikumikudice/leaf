@@ -1,3 +1,6 @@
+### 1.0.4
+\+ New functionalities to vector object.
+
 ### 1.0.3
 \+ PM-Ghost new behaviour
 \- Gramophone syntax error
