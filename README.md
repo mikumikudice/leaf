@@ -89,7 +89,7 @@ Returns the index of the `itm` if it is in `lst`, otherwise returns `nil`.
 - `leaf.table_eq(lst, otr)`<br/>
 Returns `true` if `lst` has the same items in the same indexes of `otr`, otherwise returns `false`.
 
-- `leaf.table_eq(lst)`<br/>
+- `leaf.table_copy(lst)`<br/>
 Returns an copy of `lst`.
 
 ## String
