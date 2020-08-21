@@ -1,8 +1,9 @@
 ### 1.1.0
-+ autotiling for items
-* String functions integration with string type
-- Debug bug (attempt to index "a.lot" (a nil value))
-- Some Animator bugs (op sprites in def type)
+\+ Autotiling for items
+\+ Able to skip auto-drawing of the tile map (`leaf.skip("drawtiles")`)
+\* String functions integration with string type
+\- Debug bug (attempt to index "a.lot" (a nil value))
+\- Some Animator bugs (op sprites in def type)
 
 ### 1.0.4
 \+ New functionalities to vector object.
