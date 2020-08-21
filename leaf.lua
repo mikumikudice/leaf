@@ -7,6 +7,7 @@ function leaf.debug(tag, ...)
 
     if type(tag) == 'table' then
         
+        -- Check Leaf Object Type --
         if tag.lot then
             
             tag = tag:str()
@@ -15,11 +16,14 @@ function leaf.debug(tag, ...)
 
     -- Make all arguments strings --
     for i, a in pairs(arg) do
-        
-        if a.lot then
 
-            arg[i] = a:str()
+        if type(tag) == 'table' then
+            
+            if a.lot then
 
+                arg[i] = a:str()
+            end
+            
         else arg[i] = tostring(a) end
     end
 
@@ -82,7 +86,7 @@ function leaf.table_copy(lst)
     return other
 end
 
-function leaf.string_split(str, pat)
+function string.split(self, pat)
     
     -- Table to store substrings --
     local subs = {}
@@ -91,20 +95,30 @@ function leaf.string_split(str, pat)
     while true do
 
         -- Get index of substring (div) --
-        local findx, lindx = str:find(pat)
+        local findx, lindx = self:find(pat)
 
         -- Store last substring --
         if not findx then
 
-            subs[#subs + 1] = str
+            subs[#subs + 1] = self
             break
         end
 
         -- Store the substring before (div) --
-        subs[#subs + 1], str = str:sub(1, findx - 1), str:sub(lindx + 1)
+        subs[#subs + 1], self = self:sub(1, findx - 1), self:sub(lindx + 1)
     end
 
     return subs
+end
+
+function string.startswith(self, sub)
+
+    return self:sub(1, #sub) == sub
+end
+
+function string.endswith(self, sub)
+
+    return self:sub(-#sub) == sub
 end
 
 function tobool(value)
@@ -285,9 +299,9 @@ end
     end
     
     function leaf.catch(coll)
-    
+
         for _, itm in pairs(leaf.items) do
-            
+
             if coll.x + 8 >= itm.x  and
             coll.x + 8 <= itm.x + 8 and
             coll.y == itm.y then
@@ -302,15 +316,20 @@ end
     
     local function blink(it)
     
-        if not it.exst and it.t > 0 then 
+        if not it.exst then 
     
-            local r, g, b, a = love.graphics.getColor()
-    
-            love.graphics.setColor(99/255, 199/255, 77/255, it.t/255)
-            love.graphics.rectangle('fill', it.x, it.y, 8, 8)
-            it.t = it.t - 10
-    
-            love.graphics.setColor(r, g, b, a)
+            -- Blink --
+            if it.t > 0 then
+
+                leaf.set_col(99, 199, 77, it.t)
+                
+                leaf.rectb(it.x, it.y, 8)
+                it.t = it.t - 10
+                
+                leaf.set_col()
+            
+            -- Del item --
+            else leaf.items[it.name] = nil end
         end
     end
 
@@ -342,7 +361,7 @@ end
         love.graphics.draw(leaf.tiled, self.sprt, self.bpos.x, self.bpos.y)
     end
 
-    function leaf.tilemap(main, back, info, obj)
+    function leaf.tilemap(main, back, info, itm, obj)
 
         leaf.mainground = {}
         leaf.background = {}
@@ -350,8 +369,14 @@ end
         -- Clear platforms --
         leaf.del_plat()
 
+        -- Clear items --
+        leaf.items = {}
+
         -- Tiles' definitions --
         local _dict, _thru, _skip = info.dict, info.thru, info.skip
+
+        -- Catchable item --
+        local itmc = 0
 
         -- Create Enemies --
         local spawn
@@ -364,7 +389,7 @@ end
         for ty, line in pairs(main) do
 
             -- Split Line --
-            local splitd = leaf.string_split(line, ' ')
+            local splitd = line:split(' ')
 
             -- For every tile in splited line --
             for tx, tile in pairs(splitd) do
@@ -417,7 +442,7 @@ end
         for ty, line in pairs(back) do
 
             -- Split blocks --
-            local splitd = leaf.string_split(line, ' ')
+            local splitd = line:split(' ')
 
             -- For every tile in splited line --
             for tx, tile in pairs(splitd) do
@@ -458,6 +483,12 @@ end
 
                         invoke = false
                     end
+                
+                -- Auto tiling for catchable items -- 
+                elseif itm and tile == itm.tile then
+                    
+                    leaf.add_itm('grass_' .. (itmc), tpos, dict[itm.tile], itm.wall)
+                    itmc = itmc + 1
 
                 else
 
@@ -1117,14 +1148,14 @@ end
 
         -- Frames --
         for a = 0, lx - fx do
-            
+
             src[a] = fx + a
         end
 
         -- Optional frames --
         if op then 
             
-            for i = #src, #src + op[1] do
+            for i = lx - fx + 1, lx - fx + op[1] + 1 do
                 
                 src[i] = op[2]
             end
@@ -1389,6 +1420,7 @@ function leaf.skip(...)
     for _, c in pairs(comps) do
         
         if c == 'resources' then leaf.skip_res = true end
+        if c == 'drawtiles' then leaf.skip_dtm = true end
     end 
 end
 
@@ -1416,7 +1448,7 @@ function leaf.txt_conf(font, size, speed)
     font = love.graphics.newFont('resources/' .. font, size)
     love.graphics.setFont(font)
 
-    leaf.lttr_size  = size - size / 2
+    leaf.lttr_size  = size - size / 4
     leaf.text_speed = speed
 end
 
@@ -1690,8 +1722,6 @@ function leaf.save_data(file, data, method, msg)
             data = tostring(data)
         end 
 
-        local meta
-
         if type(data) == "table" then
             
             meta = 'return {\n'
@@ -1748,7 +1778,7 @@ function leaf.load_data(file, method)
         else return end
 
         -- Break text on enters --
-        line = leaf.string_split(line, '\n')
+        line = line:split('\n')
 
         -- Remove message --
         line[1] = nil
@@ -1757,7 +1787,7 @@ function leaf.load_data(file, method)
         for idx, itm in pairs(line) do
 
             -- Get value name and value --
-            splt = leaf.string_split(itm, ':')
+            splt = itm:split(':')
 
             -- Convert to correct data type --
             if tonumber(splt[1]) then splt[1] = tonumber(splt[1]) end
@@ -1833,7 +1863,7 @@ function love.draw()
 
     -- Draw internal objects --
     draw_text()
-    leaf.draw_tilemap()
+    if not leaf.skip_dtm then leaf.draw_tilemap() end
 
     if leaf.draw then leaf.draw() end
 end
