@@ -1,3 +1,9 @@
+### 1.1.0
++ autotiling for items
+* String functions integration with string type
+- Debug bug (attempt to index "a.lot" (a nil value))
+- Some Animator bugs (op sprites in def type)
+
 ### 1.0.4
 \+ New functionalities to vector object.
 
