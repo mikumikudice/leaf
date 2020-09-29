@@ -1,6 +1,6 @@
 # <img src="icon.png">
 
-**leaf** (Love's Extensions And Facilities) is collection of libraries and classes for LÖVE. The structure of code and name of functions is entirely based on [Pyxel](https://github.com/kitao/pyxel).
+**leaf** (Love's Extensions And Facilities) is collection of libraries and classes for LÖVE. The structure of code and functions' names is entirely based on [Pyxel](https://github.com/kitao/pyxel).
 
 leaf is open source and free to use.
 
