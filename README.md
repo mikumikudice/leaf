@@ -93,8 +93,16 @@ Returns `true` if `lst` has the same items in the same indexes of `otr`, otherwi
 Returns an copy of `lst`.
 
 ## String
-- `leaf.string_split(str, pat)`<br/>
+All these functions works with string objects
+
+- `string.split(str, pat)`<br/>
 Returns a table of substrings splited by `pat` from `str`, returns `str` if doesn't find `pat`.
+
+- `string.startswith(str, sub)`<br/>
+Returns `true` if `str` starts with `sub`, otherwise returns `false`.
+
+- `string.endsswith(str, sub)`<br/>
+Returns `true` if `str` ends with `sub`, otherwise returns `false`.
 
 ## Bool
 - `leaf.tobool(str, pat)`<br/>
