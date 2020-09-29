@@ -101,7 +101,7 @@ Returns a table of substrings splited by `pat` from `str`, returns `str` if does
 - `string.startswith(str, sub)`<br/>
 Returns `true` if `str` starts with `sub`, otherwise returns `false`.
 
-- `string.endsswith(str, sub)`<br/>
+- `string.endswith(str, sub)`<br/>
 Returns `true` if `str` ends with `sub`, otherwise returns `false`.
 
 ## Bool
