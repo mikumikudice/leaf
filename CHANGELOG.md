@@ -1,5 +1,5 @@
 ### 1.1.0
-\+ Autotiling for items
+\+ Autotiling for items<br/>
 \+ Able to skip auto-drawing of the tile map (`leaf.skip("drawtiles")`)<br/>
 \* String functions integration with string type<br/>
 \- Debug bug (attempt to index "a.lot" (a nil value))<br/>
