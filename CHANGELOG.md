@@ -1,7 +1,8 @@
 ### 1.1.1
-+ object init error (out of scopes) catcher
-* other minor code changes
-- Double jump bug
+\+ Object init error (out of scopes) catcher<br/>
+\* Fixed default collision values (platform object)<br/>
+\* Other minor code changes<br/>
+\- Double jump bug
 
 ### 1.1.0
 \+ Autotiling for items<br/>
