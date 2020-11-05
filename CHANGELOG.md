@@ -1,3 +1,8 @@
+### 1.1.1
++ object init error (out of scopes) catcher
+* other minor code changes
+- Double jump bug
+
 ### 1.1.0
 \+ Autotiling for items<br/>
 \+ Able to skip auto-drawing of the tile map (`leaf.skip("drawtiles")`)<br/>
@@ -13,7 +18,7 @@
 \- Gramophone syntax error
 
 ### 1.0.2
-\+ Added leaf.ansrc (Animation Source) function
+\+ Added leaf.ansrc (Animation Source) function and type
 
 ### 1.0.1
-\+ Added sub function (_init) to avoid initialization bug (wrong scren size).
+\+ Added subfunction (\_init) to avoid initialization bug (wrong scren size).
