@@ -1,4 +1,5 @@
 leaf = {}
+leaf.CVER = "1.1.1"
 
 -- Facilities --
 function leaf.debug(tag, ...)
@@ -268,7 +269,7 @@ end
         if name then leaf.plat[name] = nil
         else leaf.plat = {} end
     end
-    
+
     function leaf.draw_plat()
     
         for _, plat in pairs(leaf.plat) do
@@ -297,7 +298,7 @@ end
         leaf.items[name] = itm
         leaf.add_tile(name, ipos, sprt, wall)
     end
-    
+
     function leaf.catch(coll)
 
         for _, itm in pairs(leaf.items) do
@@ -313,7 +314,7 @@ end
             end
         end
     end
-    
+
     local function blink(it)
     
         if not it.exst then 
@@ -486,8 +487,8 @@ end
                 
                 -- Auto tiling for catchable items -- 
                 elseif itm and tile == itm.tile then
-                    
-                    leaf.add_itm('grass_' .. (itmc), tpos, dict[itm.tile], itm.wall)
+
+                    leaf.add_itm('grass_' .. (itmc), tpos, _dict[itm.tile], itm.wall)
                     itmc = itmc + 1
 
                 else
@@ -601,8 +602,8 @@ end
         -- Screen collision --
         self.d_col = leaf.vect4V(
         
-            0, leaf.s_wdth - 4,
-            0, leaf.s_hght - 4
+            -4, leaf.s_wdth - 4,
+            -4, leaf.s_hght - 4
         )
         
         self.w_col = leaf.table_copy(self.d_col)
@@ -712,8 +713,13 @@ end
             self.jmpd = true
 
             self.y_speed = (self.jmp_stg / 2) * leaf.SSCALE / 2
-            self.jmp_cnt = false
             self.on_land = false
+
+            if type(self.jmp_cnt) == 'boolean' then
+                
+                self.jmp_cnt = false
+
+            else self.jmp_cnt = self.jmp_cnt - 1 end
         end
     
     --# Resset values --------------------------------------#--
@@ -797,7 +803,7 @@ end
     
         return re
     end
-    
+
     function platform:set_pos(npos)
     
         -- Stop falling --
@@ -806,20 +812,20 @@ end
         self.pos = npos
         self:collide()
     end
-    
+
     function platform:get_stt()
     
         return self.state
     end
-    
+
     function platform:get_yac()
     
         return self.y_speed
     end
-    
+
     function platform:can_jmp()
         
-        local jmp_cnt
+        local jmp_cnt, num_cnt
 
         -- Set jump count to boolean --
         if type(self.jmp_cnt) == "number" then
@@ -827,19 +833,22 @@ end
             if self.jmp_cnt > 0 then
                 
                 jmp_cnt = true
-            end
+
+            else jmp_cnt = false end
+
+            num_cnt = true
 
         else jmp_cnt = self.jmp_cnt end
 
         return math.floor(self.pos.y) ~= self.w_col.up
-        and jmp_cnt and self.on_land
+        and jmp_cnt and (self.on_land or num_cnt)
     end
 
     function platform:jumped()
         
         return self.jmpd
     end
-    
+
     function platform:on_wall()
     
         if self.pos.x == self.w_col.lt or self.pos.x == self.w_col.rt then return true
@@ -852,7 +861,7 @@ end
     
         return self.on_land
     end
-    
+
     function platform:get_mrr()
     
         return self.side
@@ -871,7 +880,7 @@ end
     
         return other
     end
-    
+
     function ghost:init(min, max, pos, clip)
     
         -- Missing arg --
@@ -902,7 +911,7 @@ end
             self.anim.angry = clip.angry
         end
     end
-    
+
     function ghost:step(dt, cpos)
 
         -- Update habitation space --
@@ -937,7 +946,7 @@ end
 
         else return false end
     end
-    
+
     function ghost:think(dt, cpos)
 
         local tpos = self.plat:get_pos()
@@ -1054,7 +1063,7 @@ end
     
         return other
     end
-    
+
     function anim:init(frame)
     
         -- Time cotrol --
@@ -1068,7 +1077,7 @@ end
         -- Open and store data to animate --
         self.quad = love.graphics.newQuad(frame.x * 8, frame.y * 8, 8, 8, leaf.sheet:getDimensions())
     end
-    
+
     function anim:play(dt, anim, speed, loop)
 
         -- Reset to a new animation --
@@ -1113,12 +1122,12 @@ end
             self.quad:setViewport(self.cfrm * 8, anim.row * 8, 8, 8)
         end
     end
-    
+
     function anim:loop()
     
         self.reload = true
     end
-    
+
     function anim:draw(pos, side)
 
         if math.abs(side) > 1 then
@@ -1277,7 +1286,7 @@ end
         if not leaf.disco[track] then return end
         leaf.disco[track]:resume()
     end
-    
+
     function gramophone.fade_in(track, speed)
 
         -- Make speed/s as speed/dt
@@ -1329,10 +1338,196 @@ end
     leaf.gramo = {}
     setmetatable(gramophone, leaf.gramo)
 
+--# Text type ----------------------------------------------#--
+
+    leaf.texts = {}
+
+    local random_offset = leaf.vector()
+
+    function leaf.popup(usr, msg)
+
+        local os_n = love.system.getOS()
+
+        if os_n == 'Windows' then
+
+            os.execute('msg ' .. usr .. ' ' .. msg)
+
+        elseif os_n == 'Linux' then
+        
+            os.execute('zenity --info --text="' .. msg .. '"')
+        end
+    end
+
+    function leaf.txt_conf(font, size, speed)
+        
+        font = love.graphics.newFont('resources/' .. font, size)
+        love.graphics.setFont(font)
+
+        leaf.lttr_size  = size - size / 4
+        leaf.text_speed = speed
+    end
+
+    function leaf.new_txt(tmsg, ypos, effect, trigger, tgrTime)
+
+        -- Avoid overlaping --
+        if leaf.txt_exist(tmsg) then return end
+
+        -- Invalid arguments --
+        if not type(tmsg) == "string" then
+
+            assert('Attempt to create a text with a not-string message')
+        end
+
+        if not type(ypos) == "number" then
+
+            assert('Attempt to draw a text at a non-numeric position (ypos)')
+        end
+
+        if not type(effect) == "string" then
+
+            assert('Attempt to create a text with a invalid effect type')
+        end
+
+
+        local t = {
+
+            pos = leaf.vector(0, ypos),
+
+            -- Effects --
+            tgr = trigger,
+            ttm = tgrTime,
+            efc = effect ,
+            
+            -- Timer --
+            cps   = leaf.text_speed    ,
+            speed = leaf.text_speed    ,
+            timer = 1 / leaf.text_speed,
+            
+            -- Text --
+            msg   = tmsg ,
+            ctext = ''   ,
+            ended = false,
+        }
+
+        table.insert(leaf.texts, t)
+    end
+
+    function leaf.type_txt(dt, sound)
+
+        for _, t in pairs(leaf.texts) do
+        
+            -- Set random offset --
+            random_offset.x = math.random(0, 24)
+            random_offset.y = math.random(0, 24)
+
+            -- Dramatic Waiting --
+            if t.tgr and leaf.table_find(t.tgr, #t.ctext) then t.cps = t.ttm
+            else t.cps = t.speed end
+
+            -- Set the midle position --
+            t.pos.x = leaf.s_wdth / 2 - (#t.ctext * leaf.lttr_size) / 2
+
+            -- If isn't too slow --
+            if dt > 0.035 then return end
+
+            t.timer = t.timer - dt
+
+            -- Show Text --
+            if t.timer <= 0 then
+
+                t.timer = 1 / t.cps
+                if t.ctext ~= t.msg then
+                    
+                    t.ctext = t.ctext .. t.msg:sub(#t.ctext + 1, #t.ctext + 1)
+
+                else t.ended = true end
+                
+                -- Text sound --
+                if sound then leaf.gramo.play(sound) end
+            end
+        end
+    end
+
+    local function draw_text()
+
+        for _, t in pairs(leaf.texts) do
+
+            -- Draw effects --
+            if t.efc == 'noises' then
+
+                leaf.set_col(0, 0, 255, 255/2)
+                love.graphics.print(t.ctext, t.pos.x + (random_offset.x / 12), t.pos.y)
+
+                leaf.set_col(255, 0, 0, 255/2)
+                love.graphics.print(t.ctext, t.pos.x - (random_offset.y / 12), t.pos.y)
+            
+            elseif t.efc == 'glitch' then end
+
+            -- Draw main text --
+            leaf.set_col(255, 255, 255, 255)
+            love.graphics.print(t.ctext, t.pos.x, t.pos.y)
+        end
+
+        leaf.set_col()
+    end
+
+    function leaf.txt_exist(idxr)
+        
+        for i, t in pairs(leaf.texts) do
+            
+            if t.msg == idxr then
+                
+                return true
+            end
+        end
+
+        return false
+    end
+
+    function leaf.txt_end(idxr)
+        
+        for i, t in pairs(leaf.texts) do
+            
+            if t.msg == idxr then
+                
+                return t.ended
+            end
+        end
+    end
+
+    function leaf.del_txt(idxr)
+        
+        if not idxr then
+            
+            leaf.texts = {}
+        end
+
+        for i, t in pairs(leaf.texts) do
+            
+            if t.msg == idxr then
+                
+                leaf.texts[i] = nil
+            end
+        end
+    end
+
+    function leaf.pop_txt()
+        
+        for i, t in pairs(leaf.texts) do
+            
+            if t.ended then
+                
+                leaf.texts[i] = nil
+            end
+        end
+    end
 --#---------------------------------------------------------#--
 
 function leaf.new_obj(otype, ...)
     
+    -- Calling out of an scope --
+    assert(leaf.ready, 'Cannot initialize objects before leaf.load')
+
     local object
     
     if otype == 'platform' then
@@ -1389,23 +1584,14 @@ function leaf._init(w, h, s, mv, rz, mw, mh, vs)
         local h_sheet = love.filesystem.getInfo('resources/sprites.png')
         local h_tiled = love.filesystem.getInfo('resources/tilemap.png')
 
-        if not h_sheet and not h_tiled then
+        assert(not (not h_sheet and not h_tiled),
+        'Missing base resource files (sprite sheet and tilemap palette)')
 
-            assert(false, 'Missing base resource files (sprite sheet and tilemap palette)')
-
-        elseif not h_sheet then
-
-            assert(false, 'Missing base resource file (sprite sheet)')
-
-        elseif not h_tiled then
-
-            assert(false, 'Missing base resource file (tilemap palette)')
-
-        else
-            
-            leaf.sheet = love.graphics.newImage('resources/sprites.png')
-            leaf.tiled = love.graphics.newImage('resources/tilemap.png')
-        end
+        assert(h_sheet, 'Missing base resource file (sprite sheet)')
+        assert(h_tiled, 'Missing base resource file (tilemap palette)')
+      
+        leaf.sheet = love.graphics.newImage('resources/sprites.png')
+        leaf.tiled = love.graphics.newImage('resources/tilemap.png')
     end
 
     -- Set random seed --
@@ -1422,189 +1608,6 @@ function leaf.skip(...)
         if c == 'resources' then leaf.skip_res = true end
         if c == 'drawtiles' then leaf.skip_dtm = true end
     end 
-end
-
--- Text type --
-leaf.texts = {}
-
-local random_offset = leaf.vector()
-
-function leaf.popup(usr, msg)
-
-    local os_n = love.system.getOS()
-
-    if os_n == 'Windows' then
-
-        os.execute('msg ' .. usr .. ' ' .. msg)
-
-    elseif os_n == 'Linux' then
-    
-        os.execute('zenity --info --text="' .. msg .. '"')
-    end
-end
-
-function leaf.txt_conf(font, size, speed)
-    
-    font = love.graphics.newFont('resources/' .. font, size)
-    love.graphics.setFont(font)
-
-    leaf.lttr_size  = size - size / 4
-    leaf.text_speed = speed
-end
-
-function leaf.new_txt(tmsg, ypos, effect, trigger, tgrTime)
-
-    -- Avoid overlaping --
-    if leaf.txt_exist(tmsg) then return end
-
-    -- Invalid arguments --
-    if not type(tmsg) == "string" then
-
-        assert('Attempt to create a text with a not-string message')
-    end
-
-    if not type(ypos) == "number" then
-
-        assert('Attempt to draw a text at a non-numeric position (ypos)')
-    end
-
-    if not type(effect) == "string" then
-
-        assert('Attempt to create a text with a invalid effect type')
-    end
-
-
-    local t = {
-
-        pos = leaf.vector(0, ypos),
-
-        -- Effects --
-        tgr = trigger,
-        ttm = tgrTime,
-        efc = effect ,
-        
-        -- Timer --
-        cps   = leaf.text_speed    ,
-        speed = leaf.text_speed    ,
-        timer = 1 / leaf.text_speed,
-        
-        -- Text --
-        msg   = tmsg ,
-        ctext = ''   ,
-        ended = false,
-    }
-
-    table.insert(leaf.texts, t)
-end
-
-function leaf.type_txt(dt, sound)
-
-    for _, t in pairs(leaf.texts) do
-    
-        -- Set random offset --
-        random_offset.x = math.random(0, 24)
-        random_offset.y = math.random(0, 24)
-
-        -- Dramatic Waiting --
-        if t.tgr and leaf.table_find(t.tgr, #t.ctext) then t.cps = t.ttm
-        else t.cps = t.speed end
-
-        -- Set the midle position --
-        t.pos.x = leaf.s_wdth / 2 - (#t.ctext * leaf.lttr_size) / 2
-
-        -- If isn't too slow --
-        if dt > 0.035 then return end
-
-        t.timer = t.timer - dt
-
-        -- Show Text --
-        if t.timer <= 0 then
-
-            t.timer = 1 / t.cps
-            if t.ctext ~= t.msg then
-                
-                t.ctext = t.ctext .. t.msg:sub(#t.ctext + 1, #t.ctext + 1)
-
-            else t.ended = true end
-            
-            -- Text sound --
-            if sound then leaf.gramo.play(sound) end
-        end
-    end
-end
-
-local function draw_text()
-
-    for _, t in pairs(leaf.texts) do
-
-        -- Draw effects --
-        if t.efc == 'noises' then
-
-            leaf.set_col(0, 0, 255, 255/2)
-            love.graphics.print(t.ctext, t.pos.x + (random_offset.x / 12), t.pos.y)
-
-            leaf.set_col(255, 0, 0, 255/2)
-            love.graphics.print(t.ctext, t.pos.x - (random_offset.y / 12), t.pos.y)
-        
-        elseif t.efc == 'glitch' then end
-
-        -- Draw main text --
-        leaf.set_col(255, 255, 255, 255)
-        love.graphics.print(t.ctext, t.pos.x, t.pos.y)
-    end
-
-    leaf.set_col()
-end
-
-function leaf.txt_exist(idxr)
-    
-    for i, t in pairs(leaf.texts) do
-        
-        if t.msg == idxr then
-            
-            return true
-        end
-    end
-
-    return false
-end
-
-function leaf.txt_end(idxr)
-    
-    for i, t in pairs(leaf.texts) do
-        
-        if t.msg == idxr then
-            
-            return t.ended
-        end
-    end
-end
-
-function leaf.del_txt(idxr)
-    
-    if not idxr then
-        
-        leaf.texts = {}
-    end
-
-    for i, t in pairs(leaf.texts) do
-        
-        if t.msg == idxr then
-            
-            leaf.texts[i] = nil
-        end
-    end
-end
-
-function leaf.pop_txt()
-    
-    for i, t in pairs(leaf.texts) do
-        
-        if t.ended then
-            
-            leaf.texts[i] = nil
-        end
-    end
 end
 
 -- Resset color --
@@ -1697,9 +1700,9 @@ function leaf.save_data(file, data, method, msg)
 
     -- Safe method --
     if method == 'safe' then
-        
+
         -- Create file or read it --
-        local line = msg .. '\n' or 'gamedata\n'
+        local line = (msg .. '\n') or 'gamedata\n'
 
         -- Write every value in pairs --
         for idx, itm in pairs(data) do
@@ -1821,6 +1824,8 @@ function love.load()
     
     -- If not called, replace sub with main --
     else leaf.init = leaf._init end
+    
+    leaf.ready = true
 
     if leaf.load then leaf.load() end
 end
