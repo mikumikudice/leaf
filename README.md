@@ -148,7 +148,7 @@ Returns `true` if `key` is released at that frame, otherwise returns `false`.
 
 ## Text Class
 - `leaf.txt_conf(font, size, speed)`<br/>
-Sets the default font as `font`, at size `size` and the class will type 1 letter by `speed` (seconds).
+Sets the default font as `font`, at size `size` and the class will type 1 letter per `speed` (seconds).
 
 - `leaf.new_txt(tmsg, ypos, [effect], [trigger, tgrTime])`<br/>
 Adds a new text object, that will be drawed at height `ypos` and alligned at center (acording to the size). Better with monospace fonts. If `trigger` is definided (a `table` with the letter positions) the text will wait `1/tgrTime` seconds before continue. If this text object already exists, nothing happens.
