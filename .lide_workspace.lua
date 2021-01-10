@@ -1,1 +1,0 @@
-return {["type"]="leaf",["active_view"]=1,["views"]={[1]={["selection"]={[1]=60,[2]=24,[3]=60,[4]=24},["active"]=true,["text"]=false,["filename"]="leaf.lua",["type"]="doc",["scroll"]={["x"]=0,["y"]=0}}}}
