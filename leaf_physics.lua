@@ -103,8 +103,8 @@
                 -- Set Roof --
                 if pos.y >= l.rff and pos.y <= l.rff + dg then
 
-                    if l.type == "solid" then c.up = l.rff end
-                    if l.type ~= "jthru" then c.up = 0 end
+                    if l.type ~= "jthru" then c.up = l.rff
+                    else c.up = 0 end
                 end
             end
 
@@ -169,13 +169,13 @@
         leaf.add_tile(name, ipos, sprt, wall)
     end
 
-    function leaf.catch(c)
+    function leaf.catch(pos, size)
 
         for _, itm in pairs(leaf.items) do
 
-            if c.x + c.size >= itm.x          and
-               c.x + c.size <= itm.x + c.size and
-               c.y == itm.y                  then
+            if pos.x + size >= itm.x        and
+               pos.x + size <= itm.x + size and
+               pos.y == itm.y              then
 
                 itm.exst = false
                 leaf.del_tile(itm.name)
@@ -206,8 +206,8 @@
 
         -- Animations --
         obj.state = 'idle'
-        obj.anim  = obj.anim
-        obj.clip  = obj.clip
+        obj.anim  = def.anim
+        obj.clip  = def.clip
 
         def.size = def.size or 8
         def.mass = def.mass or 8
@@ -446,7 +446,9 @@
 
     function platform:on_wall()
 
-        if self.pos.x == self.col.lt or self.pos.x == self.col.rt then return true
+        if self.pos.x == self.col.lt
+        or self.pos.x +  self.dcol.size
+        == self.col.rt then return true
         elseif self.on_lw or self.on_rw then return true
 
         else return false end
@@ -462,7 +464,7 @@
 
     -- The packman-like ghost stays --
     -- in an enclosed area until it --
-    -- something to haunt.          --
+    -- get something to haunt.      --
 
     local ghost = {}
 
@@ -488,9 +490,10 @@
         -- Ghost --
         self.thnk = {
 
-            ['lft'] = true,
-            ['rgt'] = false,
-            ['ups'] = false,
+            lft  = true,
+            rgt  = false,
+            ups  = false,
+            hate = 0
         }
 
         self.plat = leaf.new_obj('platform', pos, self.thnk)
@@ -545,48 +548,41 @@
 
         local tpos = self.plat:get_pos()
 
-        -- Create variable --
-        if not self.thnk.hate then self.thnk.hate = 0 end
-
         -- Object inside ghost's view range --
         if  cpos.y <= tpos.y and cpos.y > tpos.y - 8 then self.thnk.hate = 120 * dt end
-
         -- Object out of view range --
         if cpos.y > tpos.y then self.thnk.hate = 0 end
 
-        -- If ghost is furry yet --
+        -- If ghost is angry yet --
         if self.thnk.hate > 0 then
-
             -- Get most closer position --
             self.habt.lft = math.max(cpos.x, self.habt.lft)
+            -- Decrease hate level --
             self.habt.rgt = math.min(cpos.x, self.habt.rgt)
-
-            -- Decrease furry level --
             self.thnk.hate = self.thnk.hate - dt
         end
 
         -- Move to left --
-        if tpos.x > self.habt.rgt then
+        if tpos.x >= self.habt.rgt then
 
             self.thnk.rgt = false
             self.thnk.lft = true
         end
-
-        -- Move to rught --
-        if tpos.x < self.habt.lft then
+        -- Move to right --
+        if tpos.x <= self.habt.lft then
 
             self.thnk.lft = false
             self.thnk.rgt = true
         end
 
-        -- Beat at wall --
+        -- Stomp at wall --
         if self.plat:on_wall() then
 
             self.thnk.lft = not self.thnk.lft
             self.thnk.rgt = not self.thnk.rgt
         end
 
-        -- Do not get crazy --
+        -- Lerp the traking --
         if math.floor(tpos.x / 8) == math.floor(cpos.x / 8) and self.thnk.hate > 0 then
 
             self.thnk.lft = false

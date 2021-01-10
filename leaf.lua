@@ -55,6 +55,16 @@ function leaf._init(w, h, s, mv, rz, mw, mh, vs)
     math.randomseed(os.time() + w * h)
 end
 
+function leaf.preload(...)
+
+    local comps = {...}
+
+    for _, c in pairs(comps) do
+
+        dofile('leaf_' .. c .. '.lua')
+        leaf.__unload[c] = true
+    end
+end
 -- Skip components --
 leaf.__unload = {}
 function leaf.skip(...)

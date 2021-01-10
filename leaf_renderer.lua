@@ -529,7 +529,7 @@ function leaf.type_txt(dt, sound)
     end
 end
 
-local function draw_text()
+function draw_text()
 
     for _, t in pairs(leaf.texts) do
 
