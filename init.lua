@@ -61,7 +61,7 @@ function leaf.preload(...)
 
     for _, c in pairs(comps) do
 
-        dofile('leaf_' .. c .. '.lua')
+        dofile('leaf/leaf_' .. c .. '.lua')
         leaf.__unload[c] = true
     end
 end
@@ -127,7 +127,7 @@ if love then
 
             if not leaf.__unload[lib] then
 
-                dofile('leaf_' .. lib .. '.lua')
+                dofile('leaf/leaf_' .. lib .. '.lua')
             end
         end
 
