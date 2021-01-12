@@ -1,3 +1,7 @@
+### 1.2.0
+\+ preload pethod<br/>
+\+ Custom platform object size and weight<br/>
+
 ### 1.1.1
 \+ Object init error (out of scopes) catcher<br/>
 \* Fixed default collision values (platform object)<br/>
