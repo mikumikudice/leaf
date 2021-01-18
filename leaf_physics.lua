@@ -2,51 +2,95 @@
 
     function leaf.vector(x, y, scale)
 
-        return {
+        local mt = {
+            __metatable = 'vector',
 
-            lot = 'vector',
+            __tostring = function(self)
 
-            str = function(self)
-
-                return '{' .. (self.x)
-                .. ', ' .. (self.y) .. '}'
+                return string.format('(%.3f %.3f)', self.x, self.y)
             end,
 
-            sum = function(self, x, y)
+            __add = function(self, otr)
 
-                self.x = self.x + (x or 0)
-                self.y = self.y + (y or 0)
+                local cpy = leaf.vector(self.x, self.y)
+                cpy.x = self.x + otr.x
+                cpy.y = self.y + otr.y
 
-                return self
+                return cpy
             end,
 
-            sub = function(self, x, y)
+            __sub = function(self, otr)
 
-                self.x = self.x - (x or 0)
-                self.y = self.y - (y or 0)
+                local cpy = leaf.vector(self.x, self.y)
+                cpy.x = self.x - otr.x
+                cpy.y = self.y - otr.y
 
-                return self
+                return cpy
             end,
 
-            mul = function(self, x, y)
+            __mul = function(self, otr)
 
-                self.x = self.x * (x or 1)
-                self.y = self.y * (y or 1)
+                local cpy = leaf.vector(self.x, self.y)
 
-                return self
+                if type(otr) == table then
+
+                    cpy.x = self.x * otr.x
+                    cpy.y = self.y * otr.y
+                else
+
+                    cpy.x = self.x * otr
+                    cpy.y = self.y * otr
+                end
+
+                return cpy
             end,
 
-            div = function(self, x, y)
+            __div = function(self, otr)
 
-                self.x = self.x / (x or 1)
-                self.y = self.y / (y or 1)
+                local cpy = leaf.vector(self.x, self.y)
 
-                return self
+                if type(otr) == table then
+
+                    cpy.x = self.x / otr.x
+                    cpy.y = self.y / otr.y
+                else
+
+                    cpy.x = self.x / otr
+                    cpy.y = self.y / otr
+                end
+
+                return cpy
             end,
 
-            x = (x or 0) * (scale or 1),
-            y = (y or 0) * (scale or 1),
+            __eq = function(self, otr)
+
+                return self.x == otr.x and self.y == otr.y
+            end
         }
+
+        local up, down, left, right
+        if not (x and y) then
+
+            up    = {x = 00 * (scale or 1), y = 01 * (scale or 1)}
+            down  = {x = 00 * (scale or 1), y = -1 * (scale or 1)}
+            left  = {x = 01 * (scale or 1), y = 00 * (scale or 1)}
+            right = {x = -1 * (scale or 1), y = 00 * (scale or 1)}
+
+            setmetatable(up   , mt)
+            setmetatable(down , mt)
+            setmetatable(left , mt)
+            setmetatable(right, mt)
+
+            return {up = up, down = down, left = left, right = right}
+        end
+
+        local vect = {
+            x  = (x or 0) * (scale or 1),
+            y  = (y or 0) * (scale or 1),
+        }
+
+        setmetatable(vect, mt)
+        return vect
     end
 
     function leaf.vect4V(lt, rt, up, dn)
@@ -496,7 +540,7 @@
             hate = 0
         }
 
-        self.plat = leaf.new_obj('platform', pos, self.thnk)
+        self.plat = leaf.create('platform', pos, self.thnk)
         self.plat.x_speed = self.plat.x_speed * 0.6 -- Set speed at 60% of max
 
         -- Ghost animator --
@@ -637,7 +681,7 @@
         end
     end
 
-function leaf.new_obj(otype, ...)
+function leaf.create(otype, ...)
 
     -- Calling out of an scope --
     assert(leaf.ready, 'cannot initialize objects before leaf.load')

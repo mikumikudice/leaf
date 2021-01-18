@@ -124,7 +124,7 @@ leaf.debug('debug', true, 4, 6 - 9)
 - `leaf.popup(usr, msg)`<br/>
 Creates a pop-up window to `usr` with `msg` as content. (Avaliable only on Windows and Linux).
 
-- `leaf.set_col([r, g, b, [a]])`<br/>
+- `leaf.color([r, g, b, [a]])`<br/>
 Same of `love.graphics.setColor()`, but it uses 0 to 255 scale, and `a` is optional. If empty, resset the color to default.
 
 - `leaf.rect(x, y, [w], [h])`<br/>

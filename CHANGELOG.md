@@ -1,3 +1,17 @@
+### 1.3.1
+\+ Default vector directions<br/>
+\* Better input handler for btnp and btnr<br/>
+\* Changed tilemap method functionality<br/>
+\* Renamed leaf.debug to leaf.log<br/>
+\* Better formating in leaf.log<br/>
+\* Renamed leaf.new\_obj to leaf.create<br/>
+
+### 1.3.0
+\+ metamethods and metadata for vector type<br/>
+\+ Now leaf.color can ommit alpha<br/>
+\* Updated leaf.debug to support vector's changes<br/>
+\* Renamed leaf.set\_col to leaf.color
+
 ### 1.2.0
 \+ preload pethod<br/>
 \+ Custom platform object size and weight<br/>

@@ -1,15 +1,14 @@
-function leaf.debug(tag, ...)
+function leaf.log(tag, ...)
 
     local arg = {...}
 
     if type(tag) == 'table' then
 
-        -- Check Leaf Object Type --
-        if tag.lot then
+        -- Check if object has tostring --
+        if getmetatable(tag) then
 
-            tag = tag:str()
+            tag = tostring(tag)
         else
-
             local tmp = ''
             for i, v in pairs(tag) do
 
@@ -21,7 +20,6 @@ function leaf.debug(tag, ...)
 
                     else tmp = tmp .. ', ' end
                 else
-
                     if type(i) ~= 'number' then
 
                         tmp = (i) .. ': '
@@ -38,14 +36,7 @@ function leaf.debug(tag, ...)
     -- Make all arguments strings --
     for i, a in pairs(arg) do
 
-        if type(tag) == 'table' then
-
-            if a.lot then
-
-                arg[i] = a:str()
-            end
-
-        else arg[i] = tostring(a) end
+        arg[i] = tostring(a)
     end
 
     -- Concat arguments --
@@ -89,7 +80,10 @@ function leaf.table_eq(lst, otr)
 
     for i in pairs(lst) do
 
-        if lst[i] ~= otr[i] then return false end
+        if lst[i] ~= otr[i] or not otr[i] then
+
+            return false
+        end
     end
 
     return true
