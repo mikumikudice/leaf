@@ -105,7 +105,7 @@ Returns `true` if `str` starts with `sub`, otherwise returns `false`.
 Returns `true` if `str` ends with `sub`, otherwise returns `false`.
 
 ## Bool
-- `leaf.tobool(str, pat)`<br/>
+- `leaf.tobool(val)`<br/>
 Converts value to bool. `true` if is `"true"`, `not 0` or `not nil`.
 
 ## Debug
