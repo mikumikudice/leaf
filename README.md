@@ -141,17 +141,17 @@ Quits the application.
 Returns `true` if `key` is pressed, otherwise returns `false`.
 
 - `leaf.btnp(key)`<br/>
-Returns `true` if `key` is pressed at that frame, otherwise returns `false`.
+Returns `true` if `key` was pressed at that frame, otherwise returns `false`.
 
 - `leaf.btnr(key)`<br/>
-Returns `true` if `key` is released at that frame, otherwise returns `false`.
+Returns `true` if `key` was released at that frame, otherwise returns `false`.
 
 ## Text Class
 - `leaf.txt_conf(font, size, speed)`<br/>
-Sets the default font as `font`, at size `size` and the class will type 1 letter per `speed` (seconds).
+Sets the default font as `font`, with size `size` and the class will type 1 letter per `speed` (seconds).
 
 - `leaf.new_txt(tmsg, ypos, [effect], [trigger, tgrTime])`<br/>
-Adds a new text object, that will be drawed at height `ypos` and alligned at center (acording to the size). Better with monospace fonts. If `trigger` is definided (a `table` with the letter positions) the text will wait `1/tgrTime` seconds before continue. If this text object already exists, nothing happens.
+Adds a new text object, that will be drawed at height `ypos` and alligned at center acording to the size (better with monospaced fonts). If `trigger` is definided (a `table` with the letter positions) the text will wait `1/tgrTime` seconds before continue. If this text object already exists, nothing happens.
 
    * `effect = 'noises'` : will draw some red and blue shadows behind the text.
 
@@ -228,7 +228,7 @@ Adds an tile with the indexer `name` at `spos` (`vector`) rendered with `sprt` (
 Deletes the `name` tile.
 
 ## Platform Object
-`leaf.new_obj(otype, ...)`<br/>
+`leaf.create(otype, ...)`<br/>
 Returns a platform object of the `otype`.
 
 * Functions common to all platform types.
@@ -251,8 +251,8 @@ Returns the current animation state of `platform` (`idle` or `moving`).
 - `platform:get_yac()`<br/>
 Returns current `Y` axis acceleration.
 
-- `platform:get_jmp()`<br/>
-Returns current Y axis acceleration.
+- `platform:can_jmp()`<br/>
+Returns count of remained jumps of object or if it can jump (boolean).
 
 - `platform:jumped()`<br/>
 Returns `true` if `platform` has jumped at that frame.
@@ -264,13 +264,13 @@ Returns `true` if the `platform` is leaning against a horizontal wall.
 Returns `true` if the `platform` is landed.
 
 - `platform:get_mrr()`<br/>
-Returns the mirror state of `platform`. `-1` if sprite is flipped, `1` if is not.
+Returns the mirror state of `platform`. `-1` if sprite is flipped, `1` if it's not.
 
 ### platform
 `(ipos, ctrl, [def])`<br/>
 Returns a playable object, instantiated at `ipos`, using `ctrl` as key definition. `def` is used do give an animator object and physics parameters. e.g.
 ```lua
-ctrl = {
+local ctrl = {
 
     lft = 'left' , -- move to left
     rgt = 'right', -- move to right
@@ -281,7 +281,7 @@ ctrl = {
     atk = 'c' , -- atack
 }
 
-def = {
+local def = {
     
     speed = 1.5,         -- moviment speed
     anim  = leaf.anim(), -- animator object
@@ -292,13 +292,15 @@ def = {
 
         idle = leaf.asrc('def-idle', 0, 0, 4),    -- idle animation clip
         walk = leaf.asrc('stp-walk', 0, 4, 0, 5), -- walking animation clip
+        size = 8, 				  -- object size (value x value)
+        mass = 8,				  -- the object weight
         
-        jump_count    = 2    -- Count of jumps
-        jump_strength = -200 -- Jump strength
+        jump_count    = 2,    -- Count of jumps
+        jump_strength = -200, -- Jump strength
     }
 }
 
-char = leaf.new_obj('platform', leaf.vector(), ctrl, def)
+local char = leaf.create('platform', leaf.vector(0, 0), ctrl, def)
 ```
 
 ## pm-ghost
@@ -312,11 +314,11 @@ clip = {
     angry = leaf.asrc('idle', 2, 5, 9),
 }
 
-ghost = leaf.new_obj('pm-ghost', 0, 32, leaf.vector(), clip)
+ghost = leaf.create('pm-ghost', 0, 32, leaf.vector(0, 0), clip)
 ```
 
 ## Resources
-Leaf uses two png files ("tilemap.png" to the tile map class and "sprites.png" to animator objects) in `resources/` as graphic sources and all files in `tracks/` as audio souces. The graphic files will be automaticly loaded, except if you use `leaf.skip('resources')`.
+Leaf uses two png files ("tilemap.png" to the tilemap class and "sprites.png" to animator objects) in `resources/` as graphic sources and all files in `tracks/` as audio souces. The graphic files will be automaticly loaded, except if you use `leaf.skip('resources')`.
 
 ## Animator Object
 Animation class, responsible for controlling and animating sprites.
