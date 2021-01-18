@@ -111,11 +111,11 @@ Converts value to bool. `true` if is `"true"`, `not 0` or `not nil`.
 ## Debug
 Simple print all function.
 
-- `leaf.debug(tag, [...])`<br/>
+- `leaf.log(tag, [...])`<br/>
 prints `tag` followed by all subsequent values (`...`). e.g.
 
 ```lua
-leaf.debug('debug', true, 4, 6 - 9)
+leaf.log('debug', true, 4, 6 - 9)
 
 >>> [debug][true, 4, -3]
 ```
@@ -220,65 +220,6 @@ Sets the tile map of the game.
   `info` table with the definition of the tiles.<br/>
   `obj` optional arg. Will spawn this emeny at every `hab` found.<br/>
   e.g.
-  
-```lua
-info = {
-
-    dict = { -- dictionary of sprites corresponding to each character
-
-        ['O'] = leaf.vect(00, 00),
-        ['='] = leaf.vect(00, 01),
-        ['x'] = leaf.vect(00, 04),
-
-        ['nil'] = leaf.vect(64, 64) -- Default sprite to unknow characters
-    },
-
-    thru = {'='}, -- dictionary of Jump Thru platforms
-    skip = {'x'}, -- dictionary of tiles to be ignored
-}
-
-main = {
-
-    [0] = 'O O O O O O',
-    [1] = 'O x x x x O',
-    [2] = 'O x x x x O',
-    [3] = 'O x = = x O',
-    [4] = 'O x x x x x',
-    [5] = 'O O O O O O',
-}
-
-back = {
-
-    [0] = 'x x x x x x',
-    [1] = 'x _ @ _ _ x',
-    [2] = 'x _ _ _ _ x',
-    [3] = 'x _ x x _ x',
-    [4] = 'x # C _ # _',
-    [5] = 'x x x x x x',
-}
-
-obj = {
-
-    name = "enemy",
-    clip = {
-
-        idle  = leaf.asrc('idle' , 1, 0, 4),
-        angry = leaf.asrc('antry', 1, 5, 9),
-    }
-}
-
-itm = {             -- Catchable item
-    
-    tile = "C",     -- Tile (from dict)
-    item = "name_", -- Name prefix for the items (e.g. leaf.items = {["name_0"] = {}, ["name_1"] = {}})
-    wall = false    -- If the item is solid
-    
-}
-
-leaf.tilemap(main, back, info, itm, obj)
-```
-
-This code will create a tile map 6 x 6, where `O` is an solid tile with an sprite at `0` x `0` in the `tilemap.png` file (see Resources), `=` is an Jump Thru platform with an sprite at `0` x `1` (the `x` will be ignored in `main`). An enemy, definided by `obj` will be spawned at {`4`, `1`} and will habitate the area `0` to `4`. The function will also return a character spawn position, at {`1.4`, `2.4`} (the `@` char position plus 0.4). The code will also too create an collectable item at `C` char position, with name `name_0`.
 
 - `leaf.add_tile(name, spos, sprt, wall)`<br/>
 Adds an tile with the indexer `name` at `spos` (`vector`) rendered with `sprt` (`vector`). If `wall` is true, the tile will be solid.
