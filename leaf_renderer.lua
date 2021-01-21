@@ -93,13 +93,13 @@ function leaf.tilemap(back, main, info, itm, obj)
                 end
 
                 if  info.index.spawn
-                and item.index.spawn == t.c then
+                and info.index.spawn == t.c then
 
                     spawn = t.p
                     goto continue
                 end
 
-                if item.index.enemy == t.c then
+                if info.index.enemy == t.c then
 
                     if not _temp then
 
@@ -121,6 +121,7 @@ function leaf.tilemap(back, main, info, itm, obj)
             ::continue::
         end
     end
+    return spawn, enemy
 end
 
 local function blink(it)

@@ -96,7 +96,6 @@
     function leaf.vect4V(lt, rt, up, dn)
 
         return {
-
             lt = lt or 0,
             rt = rt or 0,
             up = up or 0,
@@ -111,7 +110,6 @@
     function leaf.add_plat(type, pos, wdt, hgt, name)
 
         local plat = {
-
             type = type,
             lft = pos.x,
             rgt = pos.x + wdt,
@@ -135,7 +133,6 @@
 
         -- Check every platform --
         for _, l in pairs(leaf.plat) do
-
             -- Check if object is between walls of platform --
             if pos.x > l.lft - c.size and pos.x < l.rgt then
                 -- Set Floor --
@@ -197,11 +194,9 @@
 --# Cachable -----------------------------------------------#--
 
     leaf.items = {}
-
     function leaf.add_itm(name, ipos, sprt, wall)
 
         local itm = {
-
             name = name,
             exst = true,
             x    = ipos.x,
@@ -259,11 +254,13 @@
     --# Physics control ------------------------------------#--
 
         -- Screen collision --
-        obj.dcol = leaf.vect4V(
+        if not def.dcol then
+            obj.dcol = leaf.vect4V(
 
-            -def.size / 2, leaf.s_wdth - def.size / 2,
-            -def.size / 2, leaf.s_hght - def.size / 2
-        )
+                -def.size / 2, leaf.s_wdth - def.size / 2,
+                -def.size / 2, leaf.s_hght - def.size / 2
+            )
+        else obj.dcol = def.dcol end
         obj.dcol.size = def.size
 
         obj.col = leaf.table_copy(obj.dcol)
