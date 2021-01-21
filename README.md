@@ -230,14 +230,19 @@ Deletes the `name` tile.
 ### Usage
 First you have to create a classtype for the tiles.
 ```lua
-local tile = {
-    p = leaf.vector(16, 8, 8), -- the tile itself position
-    s = leaf.vector(11, 0, 8), -- the sprite position at tilemap.png
-    c = tile                   -- the byte that represents its sprite
-})
+function char_to_tile(char, _x, _y)
+    local sx = char % 16
+    local sy = (char - sx) / 16
+
+    return {
+        p = leaf.vector(_y, _x, 8), -- the tile itself position
+        s = leaf.vector(sx, sy, 8), -- the sprite position at tilemap.png
+        c = char                    -- the byte that represents its sprite
+    }
+end
 ```
 The byte value is the sprite position converted into a single numeric value (0-255). You can do it using this formula: ``byte = y * 16 + x``.<br/>
----
+
 Then you'll need to specify what each tile is:
 ```lua
 local info = {
@@ -245,12 +250,12 @@ local info = {
     index = {spawn = 254}                          -- this value tells to the tilemapper to return the position of the last occurrence of 254
 }
 ```
-After this you can create a table which each value will be a line of your tilemap, containing the characters that in bytes represents your tiles.
+After this you can create a table containing all your tiles in your tilemap.
 ```lua
 local map = {
-    string.char(255) .. string.char(055) .. string.char(255),
-    string.char(255) .. string.char(034) .. string.char(255),
-    string.char(233) .. string.char(013) .. string.char(112),
+    char_to_tile(255, 0, 0), char_to_tile(055, 1, 0), char_to_tile(255, 2, 0),
+    char_to_tile(255, 0, 1), char_to_tile(034, 1, 1), char_to_tile(255, 2, 1),
+    char_to_tile(233, 0, 2), char_to_tile(013, 1, 2), char_to_tile(112, 2, 2),
 }
 ```
 Also, you can specify an item that can be caught.
