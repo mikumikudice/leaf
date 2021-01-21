@@ -1,5 +1,5 @@
 leaf = {}
-leaf.CVER = "1.3.1"
+leaf.CVER = "1.3.2"
 
 -- Skip components --
 leaf.__unload = {}

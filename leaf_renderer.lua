@@ -56,17 +56,16 @@ function leaf.tilemap(back, main, info, itm, obj)
             -- Avoid nil indexing --
             if not (info.skipt or info.jthru) then
 
+                leaf.add_plat('solid', t.p * 8, 8, 8)
                 goto continue
             end
 
             if     info.skipt[t.c] then goto continue
             elseif info.jthru[t.c] then
 
-                leaf.add_plat('jthru', t.p, 8, 8)
-            else
+                leaf.add_plat('jthru', t.p * 8, 8, 8)
 
-                leaf.add_plat('solid', t.p, 8, 8)
-            end
+            else leaf.add_plat('solid', t.p * 8, 8, 8) end
         end
 
         ::continue::
@@ -85,9 +84,9 @@ function leaf.tilemap(back, main, info, itm, obj)
 
             if info and info.index then
 
-                if itm and itm.sprt == t.c then
+                if itm and itm.tile[t.c] then
 
-                    leaf.add_itm(itm.name .. (itmc), t.p, t.s, itm.wall)
+                    leaf.add_itm(itm.name[t.c] .. (itmc), t.p, t.s, itm.wall)
 
                     itmc = itmc + 1
                     goto continue

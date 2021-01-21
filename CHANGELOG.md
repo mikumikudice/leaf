@@ -1,3 +1,7 @@
+### 1.3.2
+\* Fixed autotiling physics (tile to platform not working)<br/>
+\* Changed catchable item insertion method<br/>
+
 ### 1.3.1
 \+ Default vector directions<br/>
 \* Better input handler for btnp and btnr<br/>
