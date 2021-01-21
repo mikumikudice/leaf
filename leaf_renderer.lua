@@ -115,7 +115,8 @@ function leaf.tilemap(back, main, info, itm, obj)
                         )
                         _temp = nil
                     end
-                end
+
+                else table.insert(leaf.mainground, tile) end
 
             else table.insert(leaf.mainground, tile) end
             ::continue::
