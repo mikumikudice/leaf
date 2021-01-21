@@ -20,7 +20,12 @@ end
 
 function block:draw()
 
-    love.graphics.draw(leaf.tiled, self.sprt, self.bpos.x, self.bpos.y)
+    love.graphics.draw(
+        leaf.tiled,
+        self.sprt ,
+        self.bpos.x,
+        self.bpos.y
+    )
 end
 
 function leaf.tilemap(back, main, info, itm, obj)
@@ -103,9 +108,9 @@ function leaf.tilemap(back, main, info, itm, obj)
                     else
                         enemy[#enemy + 1] = leaf.create(
 
-                            obj.name  ,
+                            obj.name   ,
                             _temp.x + 8,
-                            t.p.x - 8,
+                              t.p.x - 8,
                             leaf.vector(t.p.x - 8, _temp.y),
                             obj.clip
                         )
