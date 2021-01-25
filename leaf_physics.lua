@@ -122,26 +122,23 @@
         else table.insert(leaf.plat, #leaf.plat, plat) end
     end
 
-    -- Set new values (vect4V) to collision --
+    -- set new values (vect4V) to collider --
     function leaf.coll(p, c, down)
 
-        local pos = leaf.table_copy(p)
-        pos.x = math.floor(p.x); pos.y = math.floor(p.y)
-
-        local dg = c.size - c.size / 4
-        local hf = c.size / 2
-
-        -- Check every platform --
+        local pos = leaf.vector(math.floor(p.x), math.floor(p.y))
+        local dg  = c.size - c.size / 4
+        local hf  = c.size / 2
+        -- check every platform --
         for _, l in pairs(leaf.plat) do
-            -- Check if object is between walls of platform --
+            -- check if object is between walls of platform --
             if pos.x > l.lft - c.size and pos.x < l.rgt then
-                -- Set Floor --
+                -- set floor --
                 if pos.y <= l.flr - c.size and pos.y >= l.flr - c.size - dg then
 
                     if l.type == "solid" then c.dn = l.flr - c.size end
                     if l.type == "jthru" and not down then c.dn = l.flr - c.size end
                 end
-                -- Set Roof --
+                -- set roof --
                 if pos.y >= l.rff and pos.y <= l.rff + dg then
 
                     if l.type ~= "jthru" then c.up = l.rff
@@ -149,19 +146,19 @@
                 end
             end
 
-            -- Check if object is between floor and roof --
+            -- check if object is between floor and roof --
             if pos.y > l.flr - c.size and pos.y < l.rff then
 
                 if l.type ~= 'platf' then
-                    -- Set wall at left --
+                    -- set wall at left --
                     if  pos.x <= l.lft - c.size
                     and pos.x >= l.lft - c.size - dg then c.rt = l.lft - c.size end
-                    -- Set wall at right --
+                    -- set wall at right --
                     if pos.x >= l.rgt and pos.x <= l.rgt + dg then c.lt = l.rgt end
                 end
             end
 
-            -- Fix bug --
+            -- fix bug --
             if pos.y > l.flr - c.size and pos.y < l.rff and l.type == 'solid' then
 
                 if  pos.x > l.lft - c.size
@@ -285,11 +282,16 @@
     end
 
     function platform:step(dt)
+        -- resset values --
+        self.on_rw   = false
+        self.on_lw   = false
+        self.jmpd    = false
+        self.on_land = false
+        -- avoid wall trhu --
+        self:fix_pos()
+        self.is_lndd = self.pos.y == self.col.dn
 
-        -- Collision --
-        self:collide()
-
-    --# Default control ------------------------------------#--
+    --# default control ------------------------------------#--
 
         if type(self.ctrl.lft) == "string" then
             -- Go to left if object can move --
@@ -311,19 +313,17 @@
             -- Not moving --
             else self.state = "idle" end
 
-    --# Control by MSM -------------------------------------#--
+    --# control by MSM -------------------------------------#--
 
         elseif self.ctrl ~= nil then
-
-            -- Go to left if object can move --
+            -- go to left if object can move --
             if self.ctrl.lft == true and
             self.pos.x - self.x_speed <= self.col.rt then
 
                 self.pos.x = self.pos.x - self.x_speed
                 self.side  = -1
             end
-
-            -- Go to right if object can move --
+            -- go to right if object can move --
             if self.ctrl.rgt == true and
             self.pos.x + self.x_speed >= self.col.lt then
 
@@ -332,44 +332,42 @@
             end
         end
 
-    --# Jump and gravity -----------------------------------#--
+    --# jump and gravity -----------------------------------#--
 
-        -- Gravity --
+        -- gravity --
         if self.pos.y < self.col.dn
         or self.y_speed ~= 0 then
 
-            self.pos.y = self.pos.y + self.y_speed * dt
-
+            self.pos.y = math.max(self.pos.y + self.y_speed * dt, self.col.up)
             -- Stop accelerating at 0.4 of the gravity speed --
             self.y_speed = self.y_speed - self.gravity * dt
             self.y_speed = math.max(self.y_speed, self.maxfall)
         end
 
-        -- Stop falling at floor and jumping at roof  --
+        -- stop falling at floor and jumping at roof  --
         if self.pos.y >= self.col.dn
-        or self.pos.y <  self.col.up then
+        or self.pos.y <= self.col.up then
+            -- on_land is true only once landed --
+            self.on_land = self.pos.y > self.col.dn or self.y_speed ~= 0
 
-            self.y_speed = 0
-            -- On landing --
+            -- on landing --
             if self.pos.y >= self.col.dn then
 
+                self.y_speed = 0
                 self.jmp_cnt = self.mx_jcnt or true
-                self.on_land = true
 
                 self.pos.y = self.col.dn
-            end
+            -- is at uplimit --
+            elseif self.y_speed < 0 then self.y_speed = 0 end
         end
 
-        -- Resset jumped boolean --
-        self.jmpd = false
-        -- Jump if object is on floor and have no space to --
+        -- jump if object is on floor and have no space to --
         if  leaf.btnp(self.ctrl.ups)
         and self:can_jmp() then
 
             self.jmpd = true
 
             self.y_speed = (self.jmp_stg / 2) * leaf.SSCALE / 2
-            self.on_land = false
 
             if type(self.jmp_cnt) == 'boolean' then
 
@@ -378,15 +376,7 @@
             else self.jmp_cnt = self.jmp_cnt - 1 end
         end
 
-    --# Resset values --------------------------------------#--
-
-        self.on_rw = false
-        self.on_lw = false
-
-        -- Avoid wall trhu --
-        self:fix_pos()
-
-    --# Animation ------------------------------------------#--
+    --# animation ------------------------------------------#--
 
         if self.anim then
             -- Jumping --
@@ -397,16 +387,18 @@
             elseif self.y_speed > 0 then
 
                 self.anim:play(dt, self.clip.fall, 8, true)
-
-            -- Walking and idle --
+            -- walking and idle --
             elseif self.state == 'moving' then
 
                 self.anim:play(dt, self.clip.walk, 8, true)
             else
-
                 self.anim:play(dt, self.clip.idle, 8, true)
             end
         end
+        -- avoid wall trhu --
+        self:fix_pos()
+        -- collision --
+        self:collide()
     end
 
     function platform:draw()
@@ -417,8 +409,7 @@
 
     function platform:collide()
         -- Reset collision paramters --
-        self.col   = leaf.table_copy(self.dcol)
-        self.on_land = false
+        self.col     = leaf.table_copy(self.dcol)
 
         -- Give down key if is a playable object --
         if type(self.ctrl.dwn) == "string" then
@@ -446,23 +437,16 @@
 
     function platform:get_pos(scale)
 
-        self:fix_pos()
-
         if not scale then scale = 1 end
 
-        re   = leaf.table_copy(self.pos)
-        re.x = math.floor(re.x / scale)
-        re.y = math.floor(re.y / scale)
-
-        return re
+        local  lp = leaf.vector(self.pos.x, self.pos.y)
+        return lp / scale
     end
 
     function platform:set_pos(npos)
-        -- Stop falling --
-        self.y_speed = 0
 
-        self.pos = npos
-        self:collide()
+        self.pos.x = npos.x
+        self.pos.y = npos.y
     end
 
     function platform:can_jmp()
@@ -482,7 +466,7 @@
         else jmp_cnt = self.jmp_cnt end
 
         return math.floor(self.pos.y) ~= self.col.up
-        and jmp_cnt and (self.on_land or num_cnt)
+        and jmp_cnt and (self.is_lndd or num_cnt)
     end
 
     function platform:on_wall()
@@ -496,7 +480,8 @@
     end
 
     function platform:jumped()  return self.jmpd    end
-    function platform:landed()  return self.on_land end
+    function platform:landed()  return self.is_lndd end
+    function platform:onland()  return self.on_land end
     function platform:get_stt() return self.state   end
     function platform:get_yac() return self.y_speed end
     function platform:get_mrr() return self.side    end
@@ -520,7 +505,6 @@
     end
 
     function ghost:init(min, max, pos, clip)
-
         -- Missing arg --
         if not pos then pos = leaf.vector(0, 0) end
 
@@ -544,7 +528,6 @@
         if clip then
 
             self.anim = leaf.anim(leaf.vector(clip.idle.row, clip.idle[0]))
-
             -- Ghost animations --
             self.anim.idle  = clip.idle
             self.anim.angry = clip.angry
@@ -552,13 +535,11 @@
     end
 
     function ghost:step(dt, cpos)
-
         -- Update habitation space --
         self.habt = leaf.table_copy(self.dhab)
         self:think(dt, cpos)
 
         self.plat:step(dt)
-
         -- If object has an animator --
         if self.anim then
 

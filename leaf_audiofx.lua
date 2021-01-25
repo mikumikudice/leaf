@@ -1,15 +1,24 @@
 function leaf.playlist(main, back, ...)
 
-    leaf.disco = {}
     leaf.tapes = {}
+    local cntt = 0
+    for _, track in ipairs({...}) do
 
-    for _, track in pairs({...}) do
-
-        leaf.tapes[#leaf.tapes] = track
+        leaf.tapes[cntt] = love.audio.newSource('tracks/' .. track, 'static')
+        cntt = cntt + 1
     end
 
-    leaf.tapes.main = love.audio.newSource('tracks/' .. main, 'stream')
-    leaf.tapes.back = love.audio.newSource('tracks/' .. back, 'stream')
+    if main then
+
+        assert(love.filesystem.getInfo('tracks/' .. main), 'main tape not found')
+        leaf.tapes.main = love.audio.newSource('tracks/' .. main, 'stream')
+    end
+
+    if back then
+
+        assert(love.filesystem.getInfo('tracks/' .. back), 'main tape not found')
+        leaf.tapes.back = love.audio.newSource('tracks/' .. back, 'stream')
+    end
 end
 
 local gramophone = {}
@@ -42,14 +51,15 @@ function gramophone.play(tape, track, loop)
 
     if loop == nil then loop = false end
 
-    -- 1 ... 7 tracks --
+    assert(tape, track, 'invalid gramophone\'s parameters')
+    -- 0 to 7 tracks --
     track = math.min(math.max(track, 0), 7)
 
-    leaf.disco[track] = love.audio.newSource(leaf.tapes[tape], 'static')
-    leaf.tapes.main:setLooping(loop)
+    assert(leaf.tapes[tape], 'invalid tape ('.. tape .. ')')
 
-    leaf.disco[track]:setVolume(track / 7)
-    leaf.disco[track]:play()
+    leaf.tapes[tape]:setLooping(loop)
+    leaf.tapes[tape]:setVolume((8 - track) / 8)
+    leaf.tapes[tape]:play()
 end
 
 function gramophone.pause(track)
@@ -112,5 +122,4 @@ function gramophone.fadeout(track, speed)
     else gramophone.stop(track) end
 end
 
-leaf.gramo = {}
-setmetatable(gramophone, leaf.gramo)
+leaf.gramo = gramophone

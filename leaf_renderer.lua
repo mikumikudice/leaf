@@ -29,11 +29,9 @@ function block:draw()
 end
 
 function leaf.tilemap(back, main, info, itm, obj)
-    -- info data :                --
     -- info.skipt: unsolid tiles  --
     -- info.jthru: jumpthru tiles --
     -- info.index: metatiles data --
-    -- info.catch: catchable item --
     leaf.background = {}
     leaf.mainground = {}
 
@@ -86,14 +84,13 @@ function leaf.tilemap(back, main, info, itm, obj)
 
                 if itm and itm.tile[t.c] then
 
-                    leaf.add_itm(itm.name[t.c] .. (itmc), t.p, t.s, itm.wall)
+                    leaf.add_itm(itm.name[t.c] .. (itmc), t.p * 8, t.s, itm.wall[t.c])
 
                     itmc = itmc + 1
                     goto continue
                 end
 
-                if  info.index.spawn
-                and info.index.spawn == t.c then
+                if info.index.spawn == t.c then
 
                     spawn = t.p
                     goto continue
@@ -138,7 +135,9 @@ local function blink(it)
 
             leaf.color()
         -- Del item --
-        else leaf.items[it.name] = nil end
+        else
+            leaf.items[it.name] = nil
+        end
     end
 end
 
@@ -171,7 +170,7 @@ function leaf.add_tile(name, spos, sprt, wall)
         leaf.tiled:getDimensions()
     )
 
-    leaf.mainground[name] = block:new(leaf.vector(x, y, 8), t)
+    leaf.mainground[name] = block:new(spos, spr)
 
     if wall then
 
@@ -471,7 +470,7 @@ function draw_text()
         elseif t.efc == 'glitch' then end
 
         -- Draw main text --
-        leaf.color(255, 255, 255, 255)
+        leaf.color(255, 255, 255)
         love.graphics.print(t.ctext, t.pos.x, t.pos.y)
     end
 
@@ -537,8 +536,13 @@ function leaf.color(nr, ng, nb, na)
             r, g, b, a = love.graphics.getColor()
         end
 
-        love.graphics.setColor(nr / 255, ng / 255, nb / 255, (na or 255) / 255)
+        love.graphics.setColor(nr / 255, ng / 255, nb / 255, na / 255)
     end
+end
+
+function leaf.bg_color(nr, ng, nb, na)
+
+    love.graphics.setBackgroundColor(nr / 255, ng / 255, nb / 255, (na or 255) / 255)
 end
 
 function leaf.rect(x, y, w, h)

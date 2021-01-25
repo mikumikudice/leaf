@@ -89,7 +89,8 @@ if love then
 
     function love.keypressed(key)
         -- Close program --
-        if key == "escape" then
+        if  key == "escape"
+        and love.window.hasFocus() then
 
             local exit
             if leaf.kill then
@@ -161,6 +162,7 @@ if love then
     function love.update(dt)
         -- Current fps --
         leaf.fps = love.timer.getFPS()
+        leaf.mem = collectgarbage('count') / 1024
 
         -- Update Screen sizw --
         leaf.s_wdth = love.graphics.getWidth()  / leaf.SSCALE

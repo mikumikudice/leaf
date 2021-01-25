@@ -1,6 +1,18 @@
+### 1.3.4
+\+ new function to platform objects (onland)<br/>
+\+ memusage value (leaf.mem)<br/>
+\+ bg\_color; sets the background color<br/>
+\+ custom physics for catchable items in autotiling<br/>
+\* a lot of fixes in audiofx (had not tested until now)<br/>
+\* fixed autotiling for items (several bugs such as collision and positioning)<br/>
+\* only closes window if it's in focus<br/>
+\* fixed platform object physics (collision issues like stomping at walls)
+
 ### 1.3.3
 \+ custom default\_collision (def.decol) for platform objects<br/>
 \* fixed tilemap position indexer (not returning spawn point)<br/>
+\---
+\* fixed tilemap layer 2 rendering (not adding tiles if info is defined)<br/>
 
 ### 1.3.2
 \* fixed autotiling physics (tile to platform not working)<br/>
