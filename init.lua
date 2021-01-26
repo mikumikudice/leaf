@@ -11,6 +11,7 @@ function leaf.skip(...)
 
             if c == 'resources' then leaf.skip_res = true
         elseif c == 'drawtiles' then leaf.skip_dtm = true
+        elseif c == 'drawtexts' then leaf.skip_dtx = true
         else leaf.__unload[c] = true end
     end
 end
@@ -179,12 +180,13 @@ if love then
     function love.draw()
 
         local scale = love.graphics.getWidth() / leaf.s_wdth
-        -- Update the drawing --
+        -- update the drawing --
         -- scale according to --
         -- the screen size    --
         love.graphics.scale(scale, scale)
-        -- Draw internal objects --
-        if draw_text then draw_text() end
+        -- draw internal objects --
+            if leaf.draw_text and
+           not leaf.skip_dtx then leaf.draw_text() end
         if not leaf.skip_dtm then leaf.draw_tilemap() end
 
         if leaf.draw then leaf.draw() end

@@ -119,7 +119,7 @@
         }
 
         if name then leaf.plat[name] = plat
-        else table.insert(leaf.plat, #leaf.plat, plat) end
+        else table.insert(leaf.plat, plat) end
     end
 
     -- set new values (vect4V) to collider --
@@ -149,7 +149,7 @@
             -- check if object is between floor and roof --
             if pos.y > l.flr - c.size and pos.y < l.rff then
 
-                if l.type ~= 'platf' then
+                if l.type ~= 'jthru' then
                     -- set wall at left --
                     if  pos.x <= l.lft - c.size
                     and pos.x >= l.lft - c.size - dg then c.rt = l.lft - c.size end
@@ -444,6 +444,8 @@
     end
 
     function platform:set_pos(npos)
+        -- zero speed to avoid bugs --
+        self.y_speed = 0
 
         self.pos.x = npos.x
         self.pos.y = npos.y

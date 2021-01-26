@@ -41,18 +41,15 @@ function leaf.save_data(file, data, method, msg)
                     i = '[' .. (i) .. ']'
                 end
 
-                meta = meta .. '\n\t' .. i .. '=' .. v .. ','
+                if type(v) == "string" then v = '"' .. v .. '"' end
+                meta = meta .. '\n\t' .. i .. '=' .. (v) .. ','
             end
 
             meta = meta .. '\n}'
 
-        elseif type(data) == "string"
-            or type(data) == "number" then
-
-            meta = 'return ' .. (data)
-
+        elseif type(data) == "string" then meta = 'return "' .. data .. '"'
+        elseif type(data) == "number" then meta = 'return ' .. (data)
         else
-
             success, message = false, 'Invalid serializable data'
         end
 
@@ -68,45 +65,42 @@ function leaf.save_data(file, data, method, msg)
 end
 
 function leaf.load_data(file, method)
-
-    -- Safe method --
+    -- safe method --
     if method == 'safe' then
 
         local splt, line
         local out = {}
-
-        -- Open and read all lines --
+        -- open and read all lines --
         if love.filesystem.getInfo(file) then
 
             line = love.filesystem.read(file)
 
         else return end
 
-        -- Break text on enters --
+        -- break text on enters --
         line = line:split('\n')
 
-        -- Remove message --
+        -- remove message --
         line[1] = nil
+        -- empty file --
+        if #line == 0 then return end
 
-        -- Read every line --
+        -- read every line --
         for idx, itm in pairs(line) do
-
-            -- Get value name and value --
+            -- get value name and value --
             splt = itm:split(':')
 
-            -- Convert to correct data type --
+            -- convert to correct data type --
             if tonumber(splt[1]) then splt[1] = tonumber(splt[1]) end
             if tonumber(splt[2]) then splt[2] = tonumber(splt[2])
             elseif tobool(splt[2]) then splt[2] = tobool(splt[2]) end
-
-            -- Store loaded data --
+            -- store loaded data --
             out[splt[1]] = splt[2]
         end
 
         return out
     end
-
-    -- Default storange --
+    -- default storange --
     if not method then
 
         if love.filesystem.getInfo(file .. '.lua') then

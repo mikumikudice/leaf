@@ -35,6 +35,9 @@ function leaf.tilemap(back, main, info, itm, obj)
     leaf.background = {}
     leaf.mainground = {}
 
+    -- clear platforms --
+    leaf.del_plat()
+
     -- item count --
     local itmc = 0
     -- metatiles --
@@ -104,10 +107,10 @@ function leaf.tilemap(back, main, info, itm, obj)
                     else
                         enemy[#enemy + 1] = leaf.create(
 
-                            obj.name   ,
-                            _temp.x + 8,
-                              t.p.x - 8,
-                            leaf.vector(t.p.x - 8, _temp.y),
+                            obj.name,
+                            _temp.x * 8 + 8,
+                              t.p.x * 8 - 8,
+                            leaf.vector(t.p.x - 1, _temp.y, 8),
                             obj.clip
                         )
                         _temp = nil
@@ -125,7 +128,7 @@ end
 local function blink(it)
 
     if not it.exst then
-        -- Blink --
+        -- blink --
         if it.t > 0 then
 
             leaf.color(99, 199, 77, it.t)
@@ -355,7 +358,7 @@ end
 
 leaf.texts = {}
 
-local random_offset = leaf.vector()
+local random_offset = leaf.vector(0, 0)
 
 function leaf.popup(usr, msg)
 
@@ -384,23 +387,12 @@ function leaf.new_txt(tmsg, ypos, effect, trigger, tgrTime)
 
     -- Avoid overlaping --
     if leaf.txt_exist(tmsg) then return end
+    if not effect then effect = "" end
 
     -- Invalid arguments --
-    if not type(tmsg) == "string" then
-
-        assert('Attempt to create a text with a not-string message')
-    end
-
-    if not type(ypos) == "number" then
-
-        assert('Attempt to draw a text at a non-numeric position (ypos)')
-    end
-
-    if not type(effect) == "string" then
-
-        assert('Attempt to create a text with a invalid effect type')
-    end
-
+    assert(type(tmsg) == "string", 'Attempt to create a text with a not-string message')
+    assert(type(ypos) == "number", 'Attempt to draw a text at a non-numeric position (ypos)')
+    assert(type(effect) == "string", 'Attempt to create a text with a invalid effect type')
 
     local t = {
         pos = leaf.vector(0, ypos),
@@ -421,7 +413,7 @@ function leaf.new_txt(tmsg, ypos, effect, trigger, tgrTime)
     table.insert(leaf.texts, t)
 end
 
-function leaf.type_txt(dt, sound)
+function leaf.type_txt(dt, sound, channel)
 
     for _, t in pairs(leaf.texts) do
         -- Set random offset --
@@ -447,24 +439,24 @@ function leaf.type_txt(dt, sound)
             if t.ctext ~= t.msg then
 
                 t.ctext = t.ctext .. t.msg:sub(#t.ctext + 1, #t.ctext + 1)
+                -- text sound --
+                if sound then leaf.gramo.play(sound, channel or 7) end
 
             else t.ended = true end
-            -- Text sound --
-            if sound then leaf.gramo.play(sound) end
         end
     end
 end
 
-function draw_text()
+function leaf.draw_text()
 
     for _, t in pairs(leaf.texts) do
         -- Draw effects --
         if t.efc == 'noises' then
 
-            leaf.color(0, 0, 255, 255/2)
+            leaf.color(0, 0, 255, 127.5)
             love.graphics.print(t.ctext, t.pos.x + (random_offset.x / 12), t.pos.y)
 
-            leaf.color(255, 0, 0, 255/2)
+            leaf.color(255, 0, 0, 127.5)
             love.graphics.print(t.ctext, t.pos.x - (random_offset.y / 12), t.pos.y)
 
         elseif t.efc == 'glitch' then end

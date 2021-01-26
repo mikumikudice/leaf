@@ -1,3 +1,14 @@
+### 1.3.5
+\+ option to manually call text\_renderer<br/>
+\* changed platforms physics definitions<br/>
+\* fixed nulity error in text rendering<br/>
+\* fixed typing sound<br/>
+\* fixed obj spawning in tilemaper<br/>
+\* fixed new\_txt assertions<br/>
+\* fixed set\_pos issues with gravity in platform object<br/>
+\* fixed leaf\_storange issues (not serializing strings correctly)<br/>
+\* fixed tilemaper not clearing old platforms<br/>
+
 ### 1.3.4
 \+ new function to platform objects (onland)<br/>
 \+ memusage value (leaf.mem)<br/>
