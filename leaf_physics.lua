@@ -298,7 +298,7 @@
             if  self.pos.x - self.x_speed <= self.col.rt
             and leaf.btn(self.ctrl.lft) then
 
-                self.pos.x = self.pos.x - self.x_speed
+                self.pos.x = self.pos.x - self.x_speed * 60 * dt
 
                 self.side  = -1
                 self.state = "moving"
@@ -306,7 +306,7 @@
             elseif self.pos.x + self.x_speed >= self.col.lt
             and    leaf.btn(self.ctrl.rgt) then
 
-                self.pos.x = self.pos.x + self.x_speed
+                self.pos.x = self.pos.x + self.x_speed * 60 * dt
 
                 self.side  = 1
                 self.state = "moving"
@@ -339,7 +339,7 @@
         or self.y_speed ~= 0 then
 
             self.pos.y = math.max(self.pos.y + self.y_speed * dt, self.col.up)
-            -- Stop accelerating at 0.4 of the gravity speed --
+            -- stop accelerating at 0.4 of the gravity speed --
             self.y_speed = self.y_speed - self.gravity * dt
             self.y_speed = math.max(self.y_speed, self.maxfall)
         end
@@ -348,8 +348,7 @@
         if self.pos.y >= self.col.dn
         or self.pos.y <= self.col.up then
             -- on_land is true only once landed --
-            self.on_land = self.pos.y > self.col.dn or self.y_speed ~= 0
-
+            self.on_land = self.pos.y > self.col.dn and not self.on_land
             -- on landing --
             if self.pos.y >= self.col.dn then
 
@@ -572,12 +571,12 @@
 
         local tpos = self.plat:get_pos()
 
-        -- Object inside ghost's view range --
+        -- object inside ghost's view range --
         if  cpos.y <= tpos.y and cpos.y > tpos.y - 8 then self.thnk.hate = 120 * dt end
-        -- Object out of view range --
+        -- object out of view range --
         if cpos.y > tpos.y then self.thnk.hate = 0 end
 
-        -- If ghost is angry yet --
+        -- if ghost is angry yet --
         if self.thnk.hate > 0 then
             -- Get most closer position --
             self.habt.lft = math.max(cpos.x, self.habt.lft)
@@ -585,21 +584,29 @@
             self.habt.rgt = math.min(cpos.x, self.habt.rgt)
             self.thnk.hate = self.thnk.hate - dt
         end
-
-        -- Move to left --
-        if tpos.x >= self.habt.rgt then
+        -- move to left --
+        if  tpos.x >= self.habt.rgt
+        and tpos.x ~= self.habt.lft then
 
             self.thnk.rgt = false
             self.thnk.lft = true
         end
-        -- Move to right --
-        if tpos.x <= self.habt.lft then
+        -- move to right --
+        if  tpos.x <= self.habt.lft
+        and tpos.x ~= self.habt.rgt then
 
             self.thnk.lft = false
             self.thnk.rgt = true
         end
 
-        -- Stomp at wall --
+        -- avoid stopping --
+        if not (self.thnk.rgt or self.thnk.lft) then
+
+            if math.floor(tpos.x) == self.habt.rgt then self.thnk.lft = true end
+            if math.floor(tpos.x) == self.habt.lft then self.thnk.rgt = true end
+        end
+
+        -- stomp at wall --
         if self.plat:on_wall() then
 
             self.thnk.lft = not self.thnk.lft

@@ -1,3 +1,6 @@
+## 1.3.6
+\- platform object movement bug (not fixed with dt)<br/>
+
 ### 1.3.5
 \+ option to manually call text\_renderer<br/>
 \* changed platforms physics definitions<br/>
