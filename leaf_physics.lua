@@ -320,14 +320,14 @@
             if self.ctrl.lft == true and
             self.pos.x - self.x_speed <= self.col.rt then
 
-                self.pos.x = self.pos.x - self.x_speed
+                self.pos.x = self.pos.x - self.x_speed * 60 * dt
                 self.side  = -1
             end
             -- go to right if object can move --
             if self.ctrl.rgt == true and
             self.pos.x + self.x_speed >= self.col.lt then
 
-                self.pos.x = self.pos.x + self.x_speed
+                self.pos.x = self.pos.x + self.x_speed * 60 * dt
                 self.side  = 1
             end
         end
