@@ -1,18 +1,18 @@
 # <img src="icon.png">
 
-**leaf** (Love's Extensions And Facilities) is collection of libraries and classes for LÖVE. The structure of code and functions' names is entirely based on [Pyxel](https://github.com/kitao/pyxel).
+**leaf** (Love's Extensions And Facilities) is collection of libraries and classes for LÖVE. The structure of code and functions' names are entirely based on [Pyxel](https://github.com/kitao/pyxel).
 
 leaf is open source and free to use.
 
 ## Features
 
 - Shorter functions' names
-- On Key Pressed Once
+- On Key Pressed Once function
 - Screen configurator
 
 - Object Platform and Multiple-State Machine Enemy classes
-- Tiledmap (physic and graphic) creator
-- 2D Colision system
+- Tiledmap (physic and graphic) renderer
+- 2D colision system
 - Sprite Animator class
 
 - Save-Load build-in system
