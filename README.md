@@ -11,7 +11,7 @@ leaf is open source and free to use.
 - Screen configurator
 
 - Object Platform and Multiple-State Machine Enemy classes
-- Tiledmap (physic and graphic) renderer
+- Physical and graphical tilemap composer
 - 2D colision system
 - Sprite Animator class
 
