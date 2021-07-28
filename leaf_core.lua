@@ -34,7 +34,7 @@ function leaf.log(tag, ...)
     end
 
     -- Make all arguments strings --
-    for i, a in pairs(arg) do
+    for i, a in ipairs(arg) do
 
         arg[i] = tostring(a)
     end

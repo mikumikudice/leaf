@@ -32,7 +32,7 @@ function leaf.save_data(file, data, method, msg)
 
         if type(data) == "table" then
 
-            meta = 'return {\n'
+            meta = 'return {'
 
             for i, v in pairs(data) do
 
@@ -42,7 +42,7 @@ function leaf.save_data(file, data, method, msg)
                 end
 
                 if type(v) == "string" then v = '"' .. v .. '"' end
-                meta = meta .. '\n\t' .. i .. '=' .. (v) .. ','
+                meta = meta .. '\n\t' .. i .. '=' .. tostring(v) .. ','
             end
 
             meta = meta .. '\n}'
@@ -52,15 +52,12 @@ function leaf.save_data(file, data, method, msg)
         else
             success, message = false, 'Invalid serializable data'
         end
-
-        -- Write it on file --
+        -- write it on file --
         if meta then
-
             success, message = love.filesystem.write(file .. '.lua', meta)
         end
     end
-
-    -- Error --
+    -- error --
     assert(success, message)
 end
 

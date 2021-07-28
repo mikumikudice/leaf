@@ -271,11 +271,21 @@ function anim:draw(pos, side)
 
     if math.abs(side) > 1 then
 
-        side = 1 * (math.abs(side) / side)
+        side = math.abs(side) / side
     end
 
     local xoff = math.min(math.min(8 * side, 8), 0)
-    love.graphics.draw(leaf.sheet, self.quad, pos.x - xoff, pos.y, 0, side, 1)
+    -- default rendering --
+    if leaf.drawmode == "default" then
+
+        love.graphics.draw(leaf.sheet, self.quad,
+        pos.x - xoff, pos.y, 0, side, 1)
+    -- pixel perfect rendering --
+    elseif leaf.drawmode == "pixper" then
+
+        love.graphics.draw(leaf.sheet, self.quad,
+        math.floor(pos.x - xoff), math.floor(pos.y), 0, side, 1)
+    end
 end
 
 function leaf.anim(ifrm)
@@ -399,7 +409,7 @@ function leaf.new_txt(tmsg, ypos, effect, trigger, tgrTime)
         -- Effects --
         tgr = trigger,
         ttm = tgrTime,
-        efc = effect ,
+        efx = effect ,
         -- Timer --
         cps   = leaf.text_speed    ,
         speed = leaf.text_speed    ,
@@ -450,20 +460,31 @@ end
 function leaf.draw_text()
 
     for _, t in pairs(leaf.texts) do
-        -- Draw effects --
-        if t.efc == 'noises' then
+        local pos
+        if leaf.drawmode == "default" then
+            pos = t.pos
+        elseif leaf.drawmode == "pixper" then
+            pos = leaf.vector(
+                math.floor(t.pos.x),
+                math.floor(t.pos.y)
+            )
+        end
+        -- draw effects --
+        if t.efx == 'noises' then
 
             leaf.color(0, 0, 255, 127.5)
-            love.graphics.print(t.ctext, t.pos.x + (random_offset.x / 12), t.pos.y)
+            love.graphics.print(t.ctext,
+            pos.x + math.floor(random_offset.x / 12), pos.y)
 
             leaf.color(255, 0, 0, 127.5)
-            love.graphics.print(t.ctext, t.pos.x - (random_offset.y / 12), t.pos.y)
+            love.graphics.print(t.ctext,
+            pos.x - math.floor(random_offset.y / 12), pos.y)
 
-        elseif t.efc == 'glitch' then end
+        elseif t.efx == 'glitch' then end
 
-        -- Draw main text --
+        -- draw main text --
         leaf.color(255, 255, 255)
-        love.graphics.print(t.ctext, t.pos.x, t.pos.y)
+        love.graphics.print(t.ctext, pos.x, pos.y)
     end
 
     leaf.color()
@@ -489,7 +510,18 @@ end
 
 function leaf.del_txt(idxr)
 
-    if not idxr then leaf.texts = {} end
+    if not idxr then
+        local cntt = #leaf.texts
+        local unff = 0
+
+        for _, t in ipairs(leaf.texts) do
+
+            if not leaf.txt_end(t.msg) then unff = unff + 1 end
+        end
+
+        leaf.texts = {}
+        return cntt, unff
+    end
 
     for i, t in pairs(leaf.texts) do
 

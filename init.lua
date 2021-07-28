@@ -17,65 +17,70 @@ function leaf.skip(...)
 end
 
 if love then
-
-    local ldd, _w, _h, _s, _rz, _mw, _mh, _vs
-    function leaf.init(w, h, s, rz, mw, mh, vs)
-
-        _w, _h, _s, _rz, _mw, _mh, _vs = w, h, s, rz, mw, mh, vs
-        ldd = true
+    local ldd, _conf
+    function leaf.init(conf)
+        _conf = conf
+        ldd   = true
     end
 
-    -- Screen configuration --
-    function leaf._init(w, h, s, mv, rz, mw, mh, vs)
+    -- screen configuration --
+    function leaf._init(conf)
+        -- default config --
+        if not conf then conf = {} end
+        conf = {
+            w = conf.w or 512, h = conf.h or 512,
+            s = conf.s or 4,
+            mv = conf.mv or true,
+            rz = conf.rz or true,
+            vs = true,
+            dm = conf.dm or "default"
+        }
+        conf.mw = conf.mw or (conf.w / (conf.s * 2))
+        conf.mh = conf.mh or (conf.h / (conf.s * 2))
 
-        if rz == nil then rz = true end
-        if vs == nil then vs = true end
+        leaf.SSCALE = conf.s
+        leaf.s_wdth = conf.w / leaf.SSCALE
+        leaf.s_hght = conf.h / leaf.SSCALE
 
-        local min_w = w / (s * 2)
-        local min_h = h / (s * 2)
-
-        leaf.SSCALE = s or 1
-        leaf.s_wdth = w / leaf.SSCALE
-        leaf.s_hght = h / leaf.SSCALE
-
-        love.window.setMode(w, h, {
-
-            resizable = rz,
-            vsync     = vs,
-            minwidth  = mw or min_w,
-            minheight = mh or min_h,
+        love.window.setMode(conf.w, conf.h, {
+            resizable = conf.rz,
+            vsync     = conf.vs,
+            minwidth  = conf.mw,
+            minheight = conf.mh,
         })
 
-        -- Fix resolution --
+        -- fix resolution --
         love.graphics.setDefaultFilter('nearest')
 
-        -- Mouse is visible --
-        if mv ~= nil then love.mouse.setVisible(mv) end
-
-        -- Resources --
+        -- resources --
         if not leaf.skip_res then
 
             local h_sheet = love.filesystem.getInfo('resources/sprites.png')
             local h_tiled = love.filesystem.getInfo('resources/tilemap.png')
 
             assert(not (not h_sheet and not h_tiled),
-            'Missing base resource files (sprite sheet and tilemap palette)')
+            'missing base resource files (sprite sheet and tilemap palette)')
 
-            assert(h_sheet, 'Missing base resource file (sprite sheet)')
-            assert(h_tiled, 'Missing base resource file (tilemap palette)')
+            assert(h_sheet, 'missing base resource file (sprite sheet)')
+            assert(h_tiled, 'missing base resource file (tilemap palette)')
 
             leaf.sheet = love.graphics.newImage('resources/sprites.png')
             leaf.tiled = love.graphics.newImage('resources/tilemap.png')
         end
 
-        -- Set random seed --
-        math.randomseed(os.time() + w * h)
+        -- set random seed --
+        math.randomseed(os.time() + conf.w * conf.h)
+
+        -- drawing method --
+        leaf.drawmode = conf.dm
+        assert(leaf.table_find({
+            'default', 'pixper'
+        }, leaf.drawmode), 'the given drawmode is invalid')
     end
 
     function leaf.preload(...)
 
         local comps = {...}
-
         for _, c in pairs(comps) do
 
             dofile('leaf/leaf_' .. c .. '.lua')
@@ -83,13 +88,13 @@ if love then
         end
     end
 
-    -- Input --
+    -- input --
     leaf.inputs = {}
     leaf.inputs.prss = {}
     leaf.inputs.rlss = {}
 
     function love.keypressed(key)
-        -- Close program --
+        -- close program --
         if  key == "escape"
         and love.window.hasFocus() then
 
@@ -115,7 +120,7 @@ if love then
     end
 
     function leaf.btnp(key)
-        -- Return if is empty key --
+        -- return if is empty key --
         if key == '' then return end
 
         local out = leaf.inputs.prss[key]
@@ -128,7 +133,7 @@ if love then
     end
 
     function leaf.btnr(key)
-        -- Return if is empty key --
+        -- return if is empty key --
         if key == '' then return end
 
         local out = leaf.inputs.rlss[key]
@@ -148,11 +153,10 @@ if love then
             end
         end
 
-        -- Call sub initializer --
+        -- call sub initializer --
         if ldd then
-
-            leaf._init(_w, _h, _s, _rz, _mw, _mh, _vs)
-        -- If not called, replace sub with main --
+            leaf._init(_conf)
+        -- if not called, replace sub with main --
         else leaf.init = leaf._init end
 
         leaf.ready = true
@@ -161,15 +165,15 @@ if love then
     end
 
     function love.update(dt)
-        -- Current fps --
+        -- current fps --
         leaf.fps = love.timer.getFPS()
         leaf.mem = collectgarbage('count') / 1024
 
-        -- Update Screen sizw --
+        -- update Screen sizw --
         leaf.s_wdth = love.graphics.getWidth()  / leaf.SSCALE
         leaf.s_hght = love.graphics.getHeight() / leaf.SSCALE
 
-        -- Leaf global step --
+        -- leaf global step --
         if leaf.step then leaf.step(dt) end
         if leaf.late then leaf.late()   end
 

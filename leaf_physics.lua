@@ -572,9 +572,11 @@
         local tpos = self.plat:get_pos()
 
         -- object inside ghost's view range --
-        if  cpos.y <= tpos.y and cpos.y > tpos.y - 8 then self.thnk.hate = 120 * dt end
+        if  cpos.y <= tpos.y and cpos.y > tpos.y - 8 then self.thnk.hate = 160 * dt end
         -- object out of view range --
-        if cpos.y > tpos.y then self.thnk.hate = 0 end
+        if cpos.y > tpos.y and self.thnk.hate > 30 * dt then
+            self.thnk.hate = 30 * dt
+        end
 
         -- if ghost is angry yet --
         if self.thnk.hate > 0 then
@@ -599,18 +601,24 @@
             self.thnk.rgt = true
         end
 
-        -- avoid stopping --
-        if not (self.thnk.rgt or self.thnk.lft) then
-
-            if math.floor(tpos.x) == self.habt.rgt then self.thnk.lft = true end
-            if math.floor(tpos.x) == self.habt.lft then self.thnk.rgt = true end
-        end
-
         -- stomp at wall --
         if self.plat:on_wall() then
 
             self.thnk.lft = not self.thnk.lft
             self.thnk.rgt = not self.thnk.rgt
+        end
+
+        -- avoid stopping --
+        if not (self.thnk.rgt or self.thnk.lft) then
+
+            if math.floor(tpos.x) == self.habt.rgt then
+                self.thnk.rgt = false
+                self.thnk.lft = true
+            end
+            if math.floor(tpos.x) == self.habt.lft then
+                self.thnk.lft = false
+                self.thnk.rgt = true
+            end
         end
 
         -- Lerp the traking --
