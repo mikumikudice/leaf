@@ -1,3 +1,6 @@
+## 1.3.7 patch
+\* fixed crash at `leaf_renderer.lua`<br/>
+
 ## 1.3.7
 \+ added drawmodes and changed leaf.init arguing method<br\> 
 

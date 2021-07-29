@@ -286,8 +286,8 @@ function anim:draw(pos, side)
 
     if leaf.drawmode == "pixper" then
         pos = leaf.vector(
-            math.floor(self.bpos.x),
-            math.floor(self.bpos.y)
+            math.floor(pos.x),
+            math.floor(pos.y)
         )
     end
 
