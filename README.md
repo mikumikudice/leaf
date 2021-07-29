@@ -29,7 +29,7 @@ leaf is a single lua file that can be loaded by the `require` function.
 require 'leaf'
 
 leaf.skip('resources')
-leaf.init(480, 480, 3)
+leaf.init({w = 480, h = 480, s = 3})
 
 local x, y = 0, 0
 
@@ -52,8 +52,16 @@ Do not use love.load | update | draw, it would override the Leaf's functions. In
 
 # API Reference
 
--`leaf.init(w, h, [s, rz, mw, mh, vs])`<br/>
-Sets the screen size (`w` x `h`), the drawing scale (`s`), if the screen is resizeable (`rz`), the min screen size (`mw` x `mh`) and if vsync is enabled (`vs`). Default values: `s = 1, rz = true, mw | mh = s * 2, vs = true`.
+-`leaf.init(conf)`<br/>
+Sets the screen size (`conf.w` x `conf.h`), the drawing scale (`conf.s`), if the screen is resizeable (`conf.rz`), the min screen size (`conf.mw` x `conf.mh`) and if vsync is enabled (`conf.vs`). Also the drawmode (`conf.dm`) See Graphics for better understanding. Default values:
+```lua
+conf = {
+    w = 512, h = 512, s = 4,
+    mv = true, rz = true,
+    vs = true,
+    dm = "default"
+}
+```
 
  - `leaf.load` <br/>
  Works like `love.load`.
@@ -121,6 +129,10 @@ leaf.log('debug', true, 4, 6 - 9)
 ```
 
 ## Graphics
+### drawmodes
+- `leaf.drawmode = "default"`: draws game sprites and shapes normally.<br/>
+- `leaf.drawmode = "pixper"` : rounds the values before drawing, keeping all shapes on-grid.<br/>
+### methods
 - `leaf.popup(usr, msg)`<br/>
 Creates a pop-up window to `usr` with `msg` as content. (Avaliable only on Windows and Linux).
 

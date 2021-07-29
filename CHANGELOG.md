@@ -1,3 +1,6 @@
+## 1.3.7
+\+ added drawmodes and changed leaf.init arguing method<br\> 
+
 ## 1.3.6
 \- platform object movement bug (not fixed with dt)<br/>
 
@@ -25,7 +28,7 @@
 ### 1.3.3
 \+ custom default\_collision (def.decol) for platform objects<br/>
 \* fixed tilemap position indexer (not returning spawn point)<br/>
-\---
+\----
 \* fixed tilemap layer 2 rendering (not adding tiles if info is defined)<br/>
 
 ### 1.3.2

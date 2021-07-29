@@ -19,12 +19,20 @@ function block:new(pos, spr)
 end
 
 function block:draw()
-
+    local pos
+    if leaf.drawmode == "default" then
+        pos = self.bpos
+    elseif leaf.drawmode == "pixper" then
+        pos = leaf.vector(
+            math.floor(self.bpos.x),
+            math.floor(self.bpos.y)
+        )
+    end
     love.graphics.draw(
         leaf.tiled,
         self.sprt ,
-        self.bpos.x,
-        self.bpos.y
+        pos.x,
+        pos.y
     )
 end
 
@@ -145,7 +153,7 @@ local function blink(it)
 end
 
 function leaf.draw_tilemap()
-    -- Draw each tile --
+    -- draw each tile --
     for _, tile in pairs(leaf.background) do
 
         tile:draw()
@@ -155,7 +163,7 @@ function leaf.draw_tilemap()
 
         tile:draw()
     end
-    -- Draw items --
+    -- draw items --
     for _, itm in pairs(leaf.items) do
 
         blink(itm)
@@ -246,18 +254,18 @@ function anim:play(dt, anim, speed, loop)
 
     -- No time left --
     if self.timr <= 0 then
-        -- Reset timer --
+        -- reset timer --
         self.timr = 1 / self.afps
 
         self.nfrm = self.nfrm + 1
 
-        -- For Loop --
+        -- for Loop --
         if self.nfrm > anim.count - 1 and loop then self.nfrm = 0 end
         if self.nfrm > anim.count - 1 and not loop then return true end
 
-        -- Next frame --
+        -- next frame --
         self.cfrm = anim[self.nfrm]
-        -- Update frame --
+        -- update frame --
         self.quad:setViewport(self.cfrm * 8, anim.row * 8, 8, 8)
     end
 end
@@ -275,17 +283,16 @@ function anim:draw(pos, side)
     end
 
     local xoff = math.min(math.min(8 * side, 8), 0)
-    -- default rendering --
-    if leaf.drawmode == "default" then
 
-        love.graphics.draw(leaf.sheet, self.quad,
-        pos.x - xoff, pos.y, 0, side, 1)
-    -- pixel perfect rendering --
-    elseif leaf.drawmode == "pixper" then
-
-        love.graphics.draw(leaf.sheet, self.quad,
-        math.floor(pos.x - xoff), math.floor(pos.y), 0, side, 1)
+    if leaf.drawmode == "pixper" then
+        pos = leaf.vector(
+            math.floor(self.bpos.x),
+            math.floor(self.bpos.y)
+        )
     end
+
+    love.graphics.draw(leaf.sheet, self.quad,
+    math.floor(pos.x - xoff), math.floor(pos.y), 0, side, 1)
 end
 
 function leaf.anim(ifrm)
@@ -296,7 +303,7 @@ function leaf.anim(ifrm)
     return out
 end
 
--- Animation Source --
+-- animation source --
 local function default(name, rw, fx, lx, op)
 
     fx = fx or 0
@@ -336,12 +343,12 @@ local function stepped(name, rw, fx, mx, lx)
 
     local src = {[0] = fx, [1] = mx, [2] = lx, [3] = mx}
 
-    -- Frame count --
+    -- frame count --
     src.count = 4
-    -- Animation row --
+    -- animation row --
     src.row = rw or 0
 
-    -- Animation --
+    -- animation --
     src.name = name
 
     return src
@@ -395,7 +402,7 @@ end
 
 function leaf.new_txt(tmsg, ypos, effect, trigger, tgrTime)
 
-    -- Avoid overlaping --
+    -- avoid overlaping --
     if leaf.txt_exist(tmsg) then return end
     if not effect then effect = "" end
 
@@ -406,15 +413,15 @@ function leaf.new_txt(tmsg, ypos, effect, trigger, tgrTime)
 
     local t = {
         pos = leaf.vector(0, ypos),
-        -- Effects --
+        -- effects --
         tgr = trigger,
         ttm = tgrTime,
         efx = effect ,
-        -- Timer --
+        -- timer --
         cps   = leaf.text_speed    ,
         speed = leaf.text_speed    ,
         timer = 1 / leaf.text_speed,
-        -- Text --
+        -- text --
         msg   = tmsg ,
         ctext = ''   ,
         ended = false,
@@ -426,18 +433,18 @@ end
 function leaf.type_txt(dt, sound, channel)
 
     for _, t in pairs(leaf.texts) do
-        -- Set random offset --
+        -- set random offset --
         random_offset.x = math.random(0, 24)
         random_offset.y = math.random(0, 24)
 
-        -- Dramatic Waiting --
+        -- dramatic waiting --
         if t.tgr and leaf.table_find(t.tgr, #t.ctext) then t.cps = t.ttm
         else t.cps = t.speed end
 
-        -- Set the midle position --
+        -- set the midle position --
         t.pos.x = leaf.s_wdth / 2 - (#t.ctext * leaf.lttr_size) / 2
 
-        -- If isn't too slow --
+        -- if isn't too slow --
         if dt > 0.035 then return end
 
         t.timer = t.timer - dt
@@ -539,10 +546,10 @@ function leaf.pop_txt()
     collectgarbage('collect')
 end
 
--- Resset color --
+-- resset color --
 local r, g, b, a
 
--- Graphic functions --
+-- graphic functions --
 function leaf.color(nr, ng, nb, na)
     -- default value --
     na = na or 255
@@ -571,10 +578,28 @@ end
 
 function leaf.rect(x, y, w, h)
 
-    love.graphics.rectangle('line', x, y, w or 1, h or w or 1)
+    local pos = leaf.vector(
+        math.floor(x),
+        math.floor(y)
+    )
+    if leaf.drawmode == "pixper" then
+        pos.x = math.floor(x)
+        pos.y = math.floor(y)
+    end
+
+    love.graphics.rectangle('line', pos.x, pos.y, w or 1, h or w or 1)
 end
 
 function leaf.rectb(x, y, w, h)
 
-    love.graphics.rectangle('fill', x, y, w or 1, h or w or 1)
+    local pos = leaf.vector(
+        math.floor(x),
+        math.floor(y)
+    )
+    if leaf.drawmode == "pixper" then
+        pos.x = math.floor(x)
+        pos.y = math.floor(y)
+    end
+
+    love.graphics.rectangle('fill', pos.x, pos.y, w or 1, h or w or 1)
 end
