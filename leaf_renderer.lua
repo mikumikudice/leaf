@@ -37,7 +37,7 @@ function block:draw()
 end
 
 function leaf.tilemap(back, main, info, itm, obj)
-    -- info.skipt: unsolid tiles  --
+    -- info.skipt: nonsolid tiles --
     -- info.jthru: jumpthru tiles --
     -- info.index: metatiles data --
     leaf.background = {}
@@ -62,7 +62,7 @@ function leaf.tilemap(back, main, info, itm, obj)
         local tile = block:new(leaf.vector(t.p.x, t.p.y, 8), sprt)
 
         if info then
-            -- Avoid nil indexing --
+            -- avoid nil indexing --
             if not (info.skipt or info.jthru) then
 
                 leaf.add_plat('solid', t.p * 8, 8, 8)
@@ -82,7 +82,6 @@ function leaf.tilemap(back, main, info, itm, obj)
     end
 
     if main then
-
         for p, t in pairs(main) do
 
             local sprt = love.graphics.newQuad(
@@ -145,7 +144,7 @@ local function blink(it)
             it.t = it.t - 10
 
             leaf.color()
-        -- Del item --
+        -- del item --
         else
             leaf.items[it.name] = nil
         end
@@ -203,7 +202,7 @@ function leaf.del_tile(name)
     end
 end
 
---# Animator -----------------------------------------------#--
+--# animator -----------------------------------------------#--
 
 local anim = {}
 
@@ -218,41 +217,41 @@ function anim:load()
 end
 
 function anim:init(frame)
-    -- Time cotrol --
+    -- time cotrol --
     self.afps = 0
     self.timr = 1 / self.afps
 
-    -- Initidal frame --
+    -- initidal frame --
     self.reload = false
     if not frame then frame = leaf.vector(0, 0) end
-    -- Open and store data to animate --
+    -- open and store data to animate --
     self.quad = love.graphics.newQuad(frame.x * 8, frame.y * 8, 8, 8, leaf.sheet:getDimensions())
 end
 
-function anim:play(dt, anim, speed, loop)
-    -- Reset to a new animation --
-    if self.canm ~= anim.name then self.reload = true end
+function anim:play(dt, anm, speed, loop)
+    -- reset to a new animation --
+    if self.canm ~= anm.name then self.reload = true end
     if self.reload then
 
-        self.canm = anim.name
+        self.canm = anm.name
         self.afps = speed
         self.timr = 1 / self.afps
 
-        self.cfrm = anim[0]
+        self.cfrm = anm[0]
         self.nfrm = 0
 
         -- Set the first frame --
-        self.quad:setViewport(self.cfrm * 8, anim.row * 8, 8, 8)
+        self.quad:setViewport(self.cfrm * 8, anm.row * 8, 8, 8)
 
         self.reload = false
     end
 
-    -- Wait if is too slow --
+    -- wait if is too slow --
     if dt > 0.035 then return end
-    -- Wait for next frame --
+    -- wait for next frame --
     self.timr = self.timr - dt
 
-    -- No time left --
+    -- no time left --
     if self.timr <= 0 then
         -- reset timer --
         self.timr = 1 / self.afps
@@ -260,13 +259,13 @@ function anim:play(dt, anim, speed, loop)
         self.nfrm = self.nfrm + 1
 
         -- for Loop --
-        if self.nfrm > anim.count - 1 and loop then self.nfrm = 0 end
-        if self.nfrm > anim.count - 1 and not loop then return true end
+        if self.nfrm > anm.count - 1 and loop then self.nfrm = 0 end
+        if self.nfrm > anm.count - 1 and not loop then return true end
 
         -- next frame --
-        self.cfrm = anim[self.nfrm]
+        self.cfrm = anm[self.nfrm]
         -- update frame --
-        self.quad:setViewport(self.cfrm * 8, anim.row * 8, 8, 8)
+        self.quad:setViewport(self.cfrm * 8, anm.row * 8, 8, 8)
     end
 end
 
@@ -310,12 +309,12 @@ local function default(name, rw, fx, lx, op)
     lx = lx or fx
 
     local src = {}
-    -- Frames --
+    -- frames --
     for a = 0, lx - fx do
 
         src[a] = fx + a
     end
-    -- Optional frames --
+    -- optional frames --
     if op then
 
         for i = lx - fx + 1, lx - fx + op[1] + 1 do
@@ -324,12 +323,12 @@ local function default(name, rw, fx, lx, op)
         end
     end
 
-    -- Frame count --
+    -- frame count --
     src.count = #src
-    -- Animation row --
+    -- animation row --
     src.row = rw or 0
 
-    -- Animation --
+    -- animation --
     src.name = name
 
     return src
@@ -393,10 +392,10 @@ end
 
 function leaf.txt_conf(font, size, speed)
 
-    font = love.graphics.newFont('resources/' .. font, size)
-    love.graphics.setFont(font)
+    leaf.font = love.graphics.newFont('resources/' .. font, size)
+    love.graphics.setFont(leaf.font)
 
-    leaf.lttr_size  = size - size / 4
+    leaf.font_size  = size
     leaf.text_speed = speed
 end
 
@@ -434,22 +433,19 @@ function leaf.type_txt(dt, sound, channel)
 
     for _, t in pairs(leaf.texts) do
         -- set random offset --
-        random_offset.x = math.random(0, 24)
-        random_offset.y = math.random(0, 24)
+        random_offset.x = math.random(1, 64)
+        random_offset.y = math.random(1, 64)
 
         -- dramatic waiting --
         if t.tgr and leaf.table_find(t.tgr, #t.ctext) then t.cps = t.ttm
         else t.cps = t.speed end
-
-        -- set the midle position --
-        t.pos.x = leaf.s_wdth / 2 - (#t.ctext * leaf.lttr_size) / 2
 
         -- if isn't too slow --
         if dt > 0.035 then return end
 
         t.timer = t.timer - dt
 
-        -- Show Text --
+        -- show text --
         if t.timer <= 0 then
 
             t.timer = 1 / t.cps
@@ -461,6 +457,9 @@ function leaf.type_txt(dt, sound, channel)
 
             else t.ended = true end
         end
+
+        -- set the midle position --
+        t.pos.x = leaf.s_wdth / 2 - leaf.font:getWidth(t.ctext) / 2
     end
 end
 
@@ -487,11 +486,111 @@ function leaf.draw_text()
             love.graphics.print(t.ctext,
             pos.x - math.floor(random_offset.y / 12), pos.y)
 
-        elseif t.efx == 'glitch' then end
+            -- draw main text --
+            leaf.color(255, 255, 255)
+            love.graphics.print(t.ctext, pos.x, pos.y)
 
-        -- draw main text --
-        leaf.color(255, 255, 255)
-        love.graphics.print(t.ctext, pos.x, pos.y)
+        elseif t.efx == 'wobbly' then
+
+            leaf.color(255, 255, 255, 127.5)
+            -- loop thru the chars --
+            for c = 1, #t.ctext do
+                love.graphics.print(t.ctext:sub(c, c),
+                    pos.x + leaf.font:getWidth(t.ctext:sub(1, c - 1)),
+                    pos.y + math.floor(math.sin(leaf.ctm * 16 + c * leaf.font_size) * 2)
+                )
+            end
+        elseif t.efx == 'glitch' then
+            -- random control of noise direction
+            local ctrl
+            if random_offset.y % 24 == 0 then ctrl = 1
+            else ctrl = 0 end
+
+            -- control of non-user-end variables --
+            if not t.__txt then t.__txt = t.ctext end
+            if not t.__fxt then t.__fxt = 0
+            elseif t.__fxt > 0 then t.__fxt = t.__fxt - 1 end
+
+            -- if the wating time has ended --
+            if t.__fxt == 0 then
+                -- update drawing-text value --
+                t.__txt = t.ctext
+
+                -- if god has picked up this frame, --
+                -- change one of the chars by other --
+                if random_offset.x % 32 == 0 then
+                    -- pick a random char and replace it --
+                    local _p = random_offset.y % #t.ctext + 1
+                    t.__txt = t.ctext:gsub(
+                        t.ctext:sub(_p, math.min(_p + 2, #t.ctext)),
+                        string.char(math.random(33, 127)) ..
+                        t.ctext:sub(_p + 1, math.min(_p + 2, #t.ctext))
+                    )
+                    t.__fxt = 10
+                end
+            end
+
+            -- once in a while slice the string --
+            local half = math.random(1, #t.ctext) * ctrl
+
+            leaf.color(0, 0, 255, 127.5)
+            love.graphics.print(t.__txt,
+                pos.x - math.floor(random_offset.y / leaf.font_size) *
+                math.random(-1, 1) * math.floor(half / 2),
+
+                pos.y - math.floor(random_offset.x / leaf.font_size) *
+                math.random(-1, 1) * math.floor(half / 2))
+
+            -- set random offset --
+            random_offset.x = math.random(1, 64)
+            random_offset.y = math.random(1, 64)
+
+            leaf.color(255, 0, 0, 127.5)
+            love.graphics.print(t.__txt,
+                pos.x - math.floor(random_offset.y / leaf.font_size) *
+                math.random(-1, 1) * math.floor(half / 2),
+
+                pos.y - math.floor(random_offset.x / leaf.font_size) *
+                math.random(-1, 1) * math.floor(half / 2))
+
+            -- set random offset --
+            random_offset.x = math.random(1, 64)
+            random_offset.y = math.random(1, 64)
+
+            leaf.color(255, 255, 255, 127.5)
+            love.graphics.print(t.__txt:sub(1, half),
+                pos.x - math.floor(random_offset.y / leaf.font_size) *
+                math.random(-1, 1) * math.floor(half / 2),
+
+                pos.y - math.floor(random_offset.x / leaf.font_size) *
+                math.random(-1, 1) * math.floor(half / 2))
+
+            -- set random offset --
+            random_offset.x = math.random(1, 64)
+            random_offset.y = math.random(1, 64)
+
+            love.graphics.print(t.__txt:sub(half),
+                pos.x + leaf.font:getWidth(t.__txt:sub(1, half))
+                - math.floor(random_offset.y / leaf.font_size) * math.random(-1, 1) * half,
+                pos.y - math.floor(random_offset.x / leaf.font_size) * math.random(-1, 1) * half)
+
+        elseif t.efx == 'shaking' then
+            for c = 1, #t.ctext do
+                local r = random_offset.x % 8 == 0
+                if r then r = 1 else r = 0 end
+
+                leaf.color(255, 255, 255, 127.5)
+
+                love.graphics.print(t.ctext:sub(c, c),
+                    pos.x + (c - 1) * leaf.font:getWidth(t.__txt:sub(half))
+                    - math.floor(random_offset.y % (leaf.font_size / 5)) * math.random(r - 1, 1),
+                    pos.y - math.floor(random_offset.x % (leaf.font_size / 5)) * math.random(r - 1, 1))
+
+                -- set random offset --
+                random_offset.x = math.random(1, 64)
+                random_offset.y = math.random(1, 64)
+            end
+        end
     end
 
     leaf.color()

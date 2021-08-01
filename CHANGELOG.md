@@ -1,8 +1,14 @@
+## 1.4.0
+\+ added more text effects<br/>
+\* fixed justified text rendering<br/>
+## 1.3.8: cleanup
+\+ fixed some shadowed warings like local redefinition<br/>
+
 ## 1.3.7 patch
 \* fixed crash at `leaf_renderer.lua`<br/>
 
 ## 1.3.7
-\+ added drawmodes and changed leaf.init arguing method<br\> 
+\+ added drawmodes and changed leaf.init arguing method<br\>
 
 ## 1.3.6
 \- platform object movement bug (not fixed with dt)<br/>

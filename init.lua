@@ -167,6 +167,7 @@ if love then
     function love.update(dt)
         -- current fps --
         leaf.fps = love.timer.getFPS()
+        leaf.ctm = love.timer.getTime()
         leaf.mem = collectgarbage('count') / 1024
 
         -- update Screen sizw --

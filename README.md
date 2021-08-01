@@ -165,7 +165,10 @@ Sets the default font as `font`, with size `size` and the class will type 1 lett
 - `leaf.new_txt(tmsg, ypos, [effect], [trigger, tgrTime])`<br/>
 Adds a new text object, that will be drawed at height `ypos` and alligned at center acording to the size (better with monospaced fonts). If `trigger` is definided (a `table` with the letter positions) the text will wait `1/tgrTime` seconds before continue. If this text object already exists, nothing happens.
 
-   * `effect = 'noises'` : will draw some red and blue shadows behind the text.
+   * `effect = 'noises'`  : will draw some red and blue shadows behind the text.
+   * `effect = 'glitch'`  : will render random red and blue glitches and change the showing text once in a while
+   * `effect = 'wobbly'`  : will draw the letters in a waveform, wobbling over the time
+   * `effect = 'shaking'` : will shake the letters separately and randomly
 
 - `leaf.type_txt(dt, [sound])`<br/>
 Updates all text objects, playing the tape `sound` if given (See Gramophone).
@@ -185,22 +188,22 @@ Removes all text objects that has ended.
 * Text Objects are automatically drawn.
 
 ## 2D Vectors
-- `leaf.vector([x], [y], [s])`<br/>
+- `leaf.vector([x[, y[, s]]])`<br/>
 Returns a new 2D vector at {`x`, `y`} with optional scale (`s`). If empty, returns a {`0`, `0`} vector.
 
-   - `vector:sum([x], [y])`<br/>
+   - `vector:sum([x[, y]])`<br/>
    Sums `x` (or `0`) and `y` (or `0`) to the vector. Returns itself.
 
-   - `vector:sub([x], [y])`<br/>
+   - `vector:sub([x[, y]])`<br/>
    Subtracts `x` (or `0`) and `y` (or `0`) from the vector. Returns itself.
 
-   - `vector:mul([x], [y])`<br/>
+   - `vector:mul([x[, y]])`<br/>
    Multiplies `vector.x` by `x` (or `1`) and `vector.y` by `y` (or `1`). Returns itself.
 
-   - `vector:mul([x], [y])`<br/>
+   - `vector:mul([x[, y]])`<br/>
    Divides `vector.x` by `x` (or `1`) and `vector.y` by `y` (or `1`). Returns itself.
 
-- `leaf.vect4D([lt], [rt], [up], [dn])`<br/>
+- `leaf.vect4D([lt[, rt[, up[, dn]]]])`<br/>
 Returns a 4dir vector with values left (`lt`), right (`rt`), up (`up`) and down (`dn`). If empty, returns all values as `0`.
 
 ## Global colliders
@@ -319,6 +322,9 @@ Returns `true` if the `platform` is leaning against a horizontal wall.
 - `platform:landed()`<br/>
 Returns `true` if the `platform` is landed.
 
+- `platform:onland()`<br/>
+Returns `true` when `platform` lands.
+
 - `platform:get_mrr()`<br/>
 Returns the mirror state of `platform`. `-1` if sprite is flipped, `1` if it's not.
 
@@ -327,7 +333,6 @@ Returns the mirror state of `platform`. `-1` if sprite is flipped, `1` if it's n
 Returns a playable object, instantiated at `ipos`, using `ctrl` as key definition. `def` is used do give an animator object and physics parameters. e.g.
 ```lua
 local ctrl = {
-
     lft = 'left' , -- move to left
     rgt = 'right', -- move to right
     dwn = 'down' , -- climb down
@@ -338,7 +343,6 @@ local ctrl = {
 }
 
 local def = {
-
     speed = 1.5,         -- moviment speed
     anim  = leaf.anim(), -- animator object
     clip  = {
@@ -364,7 +368,6 @@ local char = leaf.create('platform', leaf.vector(0, 0), ctrl, def)
 Platform Packman-like enemy. Runs the area from `min` to `max`, but is instantiated at `pos`. If defined, the `clip` will be used as an animator object, containing the idle and angry animation clips. e.g.
 ```lua
 clip = {
-
     -- Same name to change only sprites --
     idle  = leaf.asrc('idle', 2, 0, 4),
     angry = leaf.asrc('idle', 2, 5, 9),
