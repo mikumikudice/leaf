@@ -582,7 +582,7 @@ function leaf.draw_text()
                 leaf.color(255, 255, 255, 127.5)
 
                 love.graphics.print(t.ctext:sub(c, c),
-                    pos.x + (c - 1) * leaf.font:getWidth(t.__txt:sub(half))
+                    pos.x + (c - 1) * leaf.font:getWidth(t.ctext)
                     - math.floor(random_offset.y % (leaf.font_size / 5)) * math.random(r - 1, 1),
                     pos.y - math.floor(random_offset.x % (leaf.font_size / 5)) * math.random(r - 1, 1))
 
