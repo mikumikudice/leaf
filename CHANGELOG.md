@@ -1,3 +1,5 @@
+## 1.4.1
+\+ added luadoc documentation (work in progress: 1/5 done)<br/>
 ## 1.4.0
 \+ added more text effects<br/>
 \* fixed justified text rendering<br/>

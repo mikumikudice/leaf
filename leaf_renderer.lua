@@ -65,16 +65,16 @@ function leaf.tilemap(back, main, info, itm, obj)
             -- avoid nil indexing --
             if not (info.skipt or info.jthru) then
 
-                leaf.add_plat('solid', t.p * 8, 8, 8)
+                leaf.add_plat('solid', leaf.newsqr(t.p.x * 8, nil, 8))
                 goto continue
             end
 
             if     info.skipt[t.c] then goto continue
             elseif info.jthru[t.c] then
 
-                leaf.add_plat('jthru', t.p * 8, 8, 8)
+                leaf.add_plat('jthru', leaf.newsqr(t.p.x * 8, nil, 8))
 
-            else leaf.add_plat('solid', t.p * 8, 8, 8) end
+            else leaf.add_plat('solid', leaf.newsqr(t.p.x * 8, nil, 8)) end
         end
 
         ::continue::
@@ -172,7 +172,6 @@ end
 function leaf.add_tile(name, spos, sprt, wall)
 
     local spr = love.graphics.newQuad(
-
         sprt.x,
         sprt.y,
         8,
@@ -184,7 +183,7 @@ function leaf.add_tile(name, spos, sprt, wall)
 
     if wall then
 
-        leaf.add_plat('solid', spos, 8, 8, name)
+        leaf.add_plat('solid', leaf.newsqr(spos.x, spos.y, 8), name)
     end
 end
 

@@ -1,128 +1,186 @@
---# 2D Vector ----------------------------------------------#--
+--# 2D vector ----------------------------------------------#--
 
-    function leaf.vector(x, y, scale)
+    --- square object
+    --- @class sqr
+    --- @field x number
+    --- @field y number
+    --- @field w number
+    --- @field h number
 
-        local mt = {
-            __metatable = 'vector',
+    --- @class sqrdat
+    --- @field lt number
+    --- @field rt number
+    --- @field up number
+    --- @field dn number
+    --- @field size number for internal use only
 
-            __tostring = function(self)
+    --- @class vector
 
-                return string.format('(%.3f %.3f)', self.x, self.y)
-            end,
+    --- metamethods of vector
+    local mt = {
+        __metatable = 'vector',
 
-            __add = function(self, otr)
+        __tostring = function(self)
 
-                local cpy = leaf.vector(self.x, self.y)
-                cpy.x = self.x + otr.x
-                cpy.y = self.y + otr.y
+            return string.format('(%f %f)', self.x, self.y)
+        end,
 
-                return cpy
-            end,
+        __add = function(self, otr)
 
-            __sub = function(self, otr)
+            local cpy = leaf.vector(self.x, self.y)
+            cpy.x = self.x + otr.x
+            cpy.y = self.y + otr.y
 
-                local cpy = leaf.vector(self.x, self.y)
-                cpy.x = self.x - otr.x
-                cpy.y = self.y - otr.y
+            return cpy
+        end,
 
-                return cpy
-            end,
+        __sub = function(self, otr)
 
-            __mul = function(self, otr)
+            local cpy = leaf.vector(self.x, self.y)
+            cpy.x = self.x - otr.x
+            cpy.y = self.y - otr.y
 
-                local cpy = leaf.vector(self.x, self.y)
+            return cpy
+        end,
 
-                if type(otr) == table then
+        __mul = function(self, otr)
 
-                    cpy.x = self.x * otr.x
-                    cpy.y = self.y * otr.y
-                else
+            local cpy = leaf.vector(self.x, self.y)
 
-                    cpy.x = self.x * otr
-                    cpy.y = self.y * otr
-                end
+            if type(otr) == table then
 
-                return cpy
-            end,
-
-            __div = function(self, otr)
-
-                local cpy = leaf.vector(self.x, self.y)
-
-                if type(otr) == table then
-
-                    cpy.x = self.x / otr.x
-                    cpy.y = self.y / otr.y
-                else
-
-                    cpy.x = self.x / otr
-                    cpy.y = self.y / otr
-                end
-
-                return cpy
-            end,
-
-            __eq = function(self, otr)
-
-                return self.x == otr.x and self.y == otr.y
+                cpy.x = self.x * otr.x
+                cpy.y = self.y * otr.y
+            else
+                cpy.x = self.x * otr
+                cpy.y = self.y * otr
             end
-        }
 
-        local up, down, left, right
-        if not (x and y) then
+            return cpy
+        end,
 
-            up    = {x = 00 * (scale or 1), y = 01 * (scale or 1)}
-            down  = {x = 00 * (scale or 1), y = -1 * (scale or 1)}
-            left  = {x = 01 * (scale or 1), y = 00 * (scale or 1)}
-            right = {x = -1 * (scale or 1), y = 00 * (scale or 1)}
+        __div = function(self, otr)
 
-            setmetatable(up   , mt)
-            setmetatable(down , mt)
-            setmetatable(left , mt)
-            setmetatable(right, mt)
+            local cpy = leaf.vector(self.x, self.y)
 
-            return {up = up, down = down, left = left, right = right}
+            if type(otr) == table then
+
+                cpy.x = self.x / otr.x
+                cpy.y = self.y / otr.y
+            else
+                cpy.x = self.x / otr
+                cpy.y = self.y / otr
+            end
+
+            return cpy
+        end,
+
+        __eq = function(self, otr)
+
+            return self.x == otr.x and self.y == otr.y
         end
+    }
 
+    local _up, _down, _left, _right
+    _up    = {x = 00, y = 01}
+    _down  = {x = 00, y = -1}
+    _left  = {x = 01, y = 00}
+    _right = {x = -1, y = 00}
+
+    setmetatable(_up   , mt)
+    setmetatable(_down , mt)
+    setmetatable(_left , mt)
+    setmetatable(_right, mt)
+
+    --- instantiates a new 2d vector. If scale is
+    --- defined both x and y are multiplicated by
+    --- it
+    --- @param x number the x position (default 0)
+    --- @param y number the y position (default x or 0)
+    --- @param scale number the sacale of the values
+    --- @return vector
+    function leaf.vector(x, y, scale)
+        --- @type vector
         local vect = {
             x  = (x or 0) * (scale or 1),
             y  = (y or 0) * (scale or 1),
+
+            -- default arguments --
+            up = _up, down = _down,
+            left = _left, right = _right
         }
 
         setmetatable(vect, mt)
         return vect
     end
 
-    function leaf.vect4V(lt, rt, up, dn)
-
+    --- instantiates a new square data (sqrdat)\
+    --- basically a delimited area, defined by up/down side limit and left/right side limit
+    --- @param lt number left side
+    --- @param rt number right side
+    --- @param up number up side
+    --- @param dn number down side
+    --- @return sqrdat
+    function leaf.sqrdat(lt, rt, up, dn)
+        --- @type sqrdat
         return {
             lt = lt or 0,
             rt = rt or 0,
             up = up or 0,
             dn = dn or 0,
+            size = 1
         }
     end
 
---# Collision ----------------------------------------------#--
+    --- instantiates a new square (sqr) object
+    --- @param x number the x position (default 0)
+    --- @param y number the y position (default x or 0)
+    --- @param w number the square width (default 1)
+    --- @param h number the square height (default w or 1)
+    --- @return sqr
+    function leaf.newsqr(x, y, w, h)
+        --- @type sqr
+        return {
+            x = x or 0,
+            y = y or x or 0,
+            w = w or 1,
+            h = h or w or 1,
+        }
+    end
+
+--# collision ----------------------------------------------#--
 
     leaf.plat = {}
 
-    function leaf.add_plat(type, pos, wdt, hgt, name)
+    --- adds a new platform to the collision context
+    --- @param type string sets the platform type: solid / jthru (jump thru)
+    --- @param data  sqr the position and dimentions of the platform
+    function leaf.add_plat(type, data, name)
 
+        --- @class platform
+        --- @field type string platform type
+        --- @field lft number left wall value
+        --- @field rgt number right wall value
+        --- @field flr number floor value
+        --- @field rff number roof value
         local plat = {
             type = type,
-            lft = pos.x,
-            rgt = pos.x + wdt,
+            lft = data.x,
+            rgt = data.x + data.w,
 
-            flr = pos.y,
-            rff = pos.y + hgt
+            flr = data.y,
+            rff = data.y + data.h
         }
 
         if name then leaf.plat[name] = plat
         else table.insert(leaf.plat, plat) end
     end
 
-    -- set new values (vect4V) to collider --
+    --- sets new values to collider (sqrdat).\
+    --- please do not use this function, instead use a platform object
+    --- @param p vector position of the char
+    --- @param c sqrdat current platform object collider stat
+    --- @param down boolean sets the jumpthru flag (platform tiles become unsolid if true)
     function leaf.coll(p, c, down)
 
         local pos = leaf.vector(math.floor(p.x), math.floor(p.y))
@@ -170,12 +228,16 @@
         end
     end
 
+    --- desc: removes a platform from the collision context\
+    --- apdx: works only for named platforms (see leaf.add_plat)
+    --- @param name string
     function leaf.del_plat(name)
 
         if name then leaf.plat[name] = nil
         else leaf.plat = {} end
     end
 
+    --- draws shapes at positions of the platforms
     function leaf.draw_plat()
 
         for _, plat in pairs(leaf.plat) do
@@ -188,30 +250,46 @@
         end
     end
 
---# Cachable -----------------------------------------------#--
+--# catchable ----------------------------------------------#--
 
     leaf.items = {}
-    function leaf.add_itm(name, ipos, sprt, wall)
+
+    --- desc: adds a new cachable item to the environment \
+    --- apdx: adds separately tiles to the tilemap and an data table to leaf.items
+    ---@param name     string the item name
+    ---@param tsqr     table  the corresponding square descriptor (leaf.newsqr)
+    ---@param sprt     string the string containing the characters of its tiles
+    ---@param wall     boolean sets the collider status
+    function leaf.add_itm(name, tsqr, sprt, wall)
 
         local itm = {
             name = name,
             exst = true,
-            x    = ipos.x,
-            y    = ipos.y,
-            t    = 255
+            sqr  = tsqr,
+            sprt = sprt
         }
 
         leaf.items[name] = itm
-        leaf.add_tile(name, ipos, sprt, wall)
+        for i = 1, tsqr.w * tsqr.h do
+            local x = tsqr.x + (i - 1) % tsqr.w
+            local y = (i - x - 1) / tsqr.w
+            local p = leaf.vector(x, y)
+            leaf.add_tile(name, p, sprt, wall)
+        end
     end
 
-    function leaf.catch(pos, size)
+    --- executes the capture of items, if it can happen\
+    --- this function checks if the `pos` overlapped with any item\
+    --- when something is caught the fuction returns the name of the item
+    --- @param pos sqr cacher data
+    --- @return string itm
+    function leaf.catch(pos)
 
         for _, itm in pairs(leaf.items) do
 
-            if pos.x + size >= itm.x        and
-               pos.x + size <= itm.x + size and
-               pos.y == itm.y              then
+            if pos.x + pos.w >= itm.x         and
+               pos.x + pos.w <= itm.x + pos.w and
+               pos.y + pos.h >= itm.y        then
 
                 itm.exst = false
                 leaf.del_tile(itm.name)
@@ -221,7 +299,7 @@
         end
     end
 
---# Platform -----------------------------------------------#--
+--# platform -----------------------------------------------#--
 
     local platform = {}
     function platform:load(ipos, ctrl, def)
@@ -252,7 +330,7 @@
 
         -- Screen collision --
         if not def.dcol then
-            obj.dcol = leaf.vect4V(
+            obj.dcol = leaf.sqrdat(
 
                 -def.size / 2, leaf.s_wdth - def.size / 2,
                 -def.size / 2, leaf.s_hght - def.size / 2
