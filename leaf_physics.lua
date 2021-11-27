@@ -134,9 +134,9 @@
 
     --- instantiates a new square (sqr) object
     --- @param x number the x position (default 0)
-    --- @param y number the y position (default x or 0)
+    --- @param y number the y position (default `x` or 0)
     --- @param w number the square width (default 1)
-    --- @param h number the square height (default w or 1)
+    --- @param h number the square height (default `w` or 1)
     --- @return sqr
     function leaf.newsqr(x, y, w, h)
         --- @type sqr
@@ -240,14 +240,18 @@
     --- draws shapes at positions of the platforms
     function leaf.draw_plat()
 
+        leaf.color(255, 255, 255)
         for _, plat in pairs(leaf.plat) do
-
             leaf.rectb(
                 plat.lft, plat.rff,
                 plat.rgt - plat.lft,
                 plat.flr - plat.rff
             )
+            leaf.log('plat', plat.lft, plat.rff,
+            plat.rgt - plat.lft,
+            plat.flr - plat.rff)
         end
+        leaf.color()
     end
 
 --# catchable ----------------------------------------------#--
@@ -351,6 +355,7 @@
         obj.mx_jcnt = def.jump_count
         obj.jmp_cnt = def.jump_count    or true
         obj.jmp_stg = def.jump_strength or -def.mass * 25
+        obj.coyotim = def.coyote_time or 0
 
         obj.gravity = obj.jmp_stg * (obj.jmp_stg / (obj.jmp_stg / (def.mass * 0.4)))
         obj.maxfall = obj.gravity * 0.4
@@ -364,7 +369,11 @@
         self.on_rw   = false
         self.on_lw   = false
         self.jmpd    = false
+
+        if self.on_land then self.coyoefx = self.coyotim end
+        if self.coyoefx > 0 then self.coyoefx = self.coyoefx - 1 end
         self.on_land = false
+
         -- avoid wall trhu --
         self:fix_pos()
         self.is_lndd = self.pos.y == self.col.dn
@@ -545,7 +554,7 @@
         else jmp_cnt = self.jmp_cnt end
 
         return math.floor(self.pos.y) ~= self.col.up
-        and jmp_cnt and (self.is_lndd or num_cnt)
+        and jmp_cnt and (self.is_lndd or self.coyoefx > 0 or num_cnt)
     end
 
     function platform:on_wall()

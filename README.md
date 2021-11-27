@@ -227,14 +227,13 @@ Adds a collectable item at `ipos`, rendered with `sprt` (`vector`). Will be a so
 Destroys overlapped items by `call` (`vector`) and returns item name if was caught.
 
 ## Tile map
-- `leaf.tilemap(main, back, info, [obj])`<br/>
+- `leaf.tilemap(back, main, info, [obj])`<br/>
 Sets the tile map of the game.
 
-  `main` table with the tiles of the main layer.<br/>
-  `back` table with tiles at the background (not solid).<br/>
+  `back` metatable with the layers at the background (not solid).<br/>
+  `main` table with the tiles of the main layer (solid).<br/>
   `info` table with the definition of the tiles.<br/>
-  `obj` optional arg. Will spawn this emeny at every `hab` found.<br/>
-  e.g.
+  `obj`  optional arg. table with the definitions of enemies that will be spawned at every correponding tile.<br/>
 
 - `leaf.add_tile(name, spos, sprt, wall)`<br/>
 Adds an tile with the indexer `name` at `spos` (`vector`) rendered with `sprt` (`vector`). If `wall` is true, the tile will be solid.
@@ -281,9 +280,31 @@ local item = {
     name = {[45] = 'star_', [61] = 'coin_'},  -- to you be able of accessing it later, name the items with a prefix
 }
 ```
+Finally, if you want, you can instantiate enemies to prow in a certain area (between every two chars).
+```lua
+    local enemy = { -- the arg must be a table of every enemy, in this case just one
+        [66] = {    -- the char that represents the bounds of the enemy habbitation
+            name = 'pm-ghost', -- name given to leaf.create()
+            clip = {
+                -- same source name to --
+                -- change only sprites --
+                -- and not the current --
+                -- frame               --
+                idle  = leaf.asrc('idle', 2, 0, 04),
+                angry = leaf.asrc('idle', 2, 5, 10),
+            }
+        }
+    }
+    ```
+```
 Then just give everything to the tilemapper:
 ```lua
-leaf.tilemap(map, _, info, item)
+leaf.tilemap(map, _, info, item, enemy)
+```
+It's highly recomended that you use the [Ethereal tilemap editor](https://github.com/mateus-md/Ethereal) instead of tiling by hand. In this case, do something like this:
+```lua
+local main, back = leaf.decoder('map.txt')
+leaf.tilemap(main, back, info, item, enemy)
 ```
 
 ## Platform Object
@@ -357,6 +378,7 @@ local def = {
 
         jump_count    = 2,    -- Count of jumps
         jump_strength = -200, -- Jump strength
+        coytote_time  = 4,    -- how may frames after falling off from a platform are still able to jump
     }
 }
 

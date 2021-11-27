@@ -1,4 +1,4 @@
---# Tile map -----------------------------------------------#--
+--# tilemap ------------------------------------------------#--
 
 leaf.mainground = {}
 leaf.background = {}
@@ -36,6 +36,15 @@ function block:draw()
     )
 end
 
+--- sets the tilemap in the foreground (solid) and in the background\
+--- note that the tilemap is ereased before set again
+--- @param back table background tiles
+--- @param main table mainground tiles
+--- @param info table contains the tilemap metadata
+--- @param itm  table contains the catchable items of the map
+--- @param obj  table contains the data of the spawnable enemies in the map
+--- @return vector spawn the spawn position found in the map
+--- @return table  enemies all the enemies instantiated by the map
 function leaf.tilemap(back, main, info, itm, obj)
     -- info.skipt: nonsolid tiles --
     -- info.jthru: jumpthru tiles --
@@ -53,36 +62,42 @@ function leaf.tilemap(back, main, info, itm, obj)
     local _temp
     local enemy = {}
 
-    for _, t in ipairs(back) do
+    assert(back, 'missing tilemap data (back is nil)')
 
-        local sprt = love.graphics.newQuad(
+    -- for layer in background --
+    for _, l in ipairs(back) do
+        -- for tile in layer --
+        for _, t in ipairs(l) do
 
-            t.s.x, t.s.y, 8, 8, leaf.tiled:getDimensions()
-        )
-        local tile = block:new(leaf.vector(t.p.x, t.p.y, 8), sprt)
+            local sprt = love.graphics.newQuad(
 
-        if info then
-            -- avoid nil indexing --
-            if not (info.skipt or info.jthru) then
+                t.s.x, t.s.y, 8, 8, leaf.tiled:getDimensions()
+            )
+            local tile = block:new(leaf.vector(t.p.x, t.p.y, 8), sprt)
 
-                leaf.add_plat('solid', leaf.newsqr(t.p.x * 8, nil, 8))
-                goto continue
+            if info then
+                -- avoid nil indexing --
+                if not (info.skipt or info.jthru) then
+
+                    leaf.add_plat('solid', leaf.newsqr(t.p.x * 8, t.p.y * 8, 8))
+                    goto continue
+                end
+
+                if     info.skipt[t.c] then goto continue
+                elseif info.jthru[t.c] then
+
+                    leaf.add_plat('jthru', leaf.newsqr(t.p.x * 8, t.p.y * 8, 8))
+
+                else leaf.add_plat('solid', leaf.newsqr(t.p.x * 8, t.p.y * 8, 8)) end
             end
 
-            if     info.skipt[t.c] then goto continue
-            elseif info.jthru[t.c] then
-
-                leaf.add_plat('jthru', leaf.newsqr(t.p.x * 8, nil, 8))
-
-            else leaf.add_plat('solid', leaf.newsqr(t.p.x * 8, nil, 8)) end
+            ::continue::
+            leaf.background[#leaf.background + 1] = tile
         end
-
-        ::continue::
-        table.insert(leaf.background, tile)
     end
 
     if main then
-        for p, t in pairs(main) do
+        for _, t in pairs(main) do
 
             local sprt = love.graphics.newQuad(
 
@@ -106,7 +121,7 @@ function leaf.tilemap(back, main, info, itm, obj)
                     goto continue
                 end
 
-                if info.index.enemy == t.c then
+                if info.index.enemy[t.c] then
 
                     if not _temp then
 
@@ -114,22 +129,79 @@ function leaf.tilemap(back, main, info, itm, obj)
                     else
                         enemy[#enemy + 1] = leaf.create(
 
-                            obj.name,
+                            obj[t.c].name,
                             _temp.x * 8 + 8,
-                              t.p.x * 8 - 8,
+                                t.p.x * 8 - 8,
                             leaf.vector(t.p.x - 1, _temp.y, 8),
-                            obj.clip
+                            obj[t.c].clip
                         )
                         _temp = nil
                     end
 
-                else table.insert(leaf.mainground, tile) end
+                else leaf.mainground[#leaf.mainground + 1] = tile end
 
-            else table.insert(leaf.mainground, tile) end
+            else leaf.mainground[#leaf.mainground + 1] = tile end
             ::continue::
         end
     end
     return spawn, enemy
+end
+
+--- decodes a binary file outputed by the Ethereal tilemap editor
+--- @param file string file path
+--- @return table, table
+function leaf.decoder(file)
+    local cntt = love.filesystem.read('rooms/room_' .. room.rid .. '.map')
+    local backdata = cntt:sub(001, 289):split('ç')
+    local maindata = cntt:sub(292, 581):split('ç')
+
+    local _back = {}
+    local _main = {}
+
+    for y = 0, #backdata - 1 do
+        --- internal class\
+        --- type that holds the (final) tiles data, i.e. the tiles used by leaf.tilemap
+        --- @class tileobj
+        --- @field p vector
+        --- @field s vector
+        --- @field c number
+
+        local line = backdata[y + 1]
+        for x = 0, #line - 1 do
+
+            local rt = line:sub(x + 1, x + 1):byte()
+            local sx = rt % 16
+            local sy = (rt - sx) / 16
+
+            --- @type tileobj
+            local tile = {
+                p = leaf.vector(x * 8 + 4, y * 8 + 4, 0.125),
+                s = leaf.vector(sx, sy, 8),
+                c = rt
+            }
+            table.insert(_back, tile)
+        end
+    end
+
+    for y = 0, #maindata - 1 do
+
+        local line = maindata[y + 1]
+        for x = 0, #line - 1 do
+
+            local rt = line:sub(x + 1, x + 1):byte()
+            local sx = rt % 16
+            local sy = (rt - sx) / 16
+
+            --- @type tileobj
+            local tile = {
+                p = leaf.vector(x * 8 + 4, y * 8 + 4, 0.125),
+                s = leaf.vector(sx, sy, 8),
+                c = rt
+            }
+            table.insert(_main, tile)
+        end
+    end
+    return _back, _main
 end
 
 local function blink(it)
@@ -145,9 +217,7 @@ local function blink(it)
 
             leaf.color()
         -- del item --
-        else
-            leaf.items[it.name] = nil
-        end
+        else leaf.items[it.name] = nil end
     end
 end
 
@@ -676,10 +746,7 @@ end
 
 function leaf.rect(x, y, w, h)
 
-    local pos = leaf.vector(
-        math.floor(x),
-        math.floor(y)
-    )
+    local pos = leaf.vector(x, y)
     if leaf.drawmode == "pixper" then
         pos.x = math.floor(x)
         pos.y = math.floor(y)
@@ -690,10 +757,7 @@ end
 
 function leaf.rectb(x, y, w, h)
 
-    local pos = leaf.vector(
-        math.floor(x),
-        math.floor(y)
-    )
+    local pos = leaf.vector(x, y)
     if leaf.drawmode == "pixper" then
         pos.x = math.floor(x)
         pos.y = math.floor(y)

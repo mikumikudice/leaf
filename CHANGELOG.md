@@ -1,3 +1,10 @@
+## 1.5.0
+\+ now able to spawn different types of enemies with the tilemapper<br/>
+\+ now able to set multiple layers of tilemap<br/>
+\+ coyote time option for platform objects<br/>
+\* fixed bug with tilemapper (autotiling for solid blocks not working properly)<br/>
+\* fixed drawing functions (rect and rectb)<br/>
+
 ## 1.4.1
 \+ added luadoc documentation (work in progress: 1/5 done)<br/>
 ## 1.4.0
