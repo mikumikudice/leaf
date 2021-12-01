@@ -83,7 +83,7 @@ if love then
         local comps = {...}
         for _, c in pairs(comps) do
 
-            dofile('leaf/leaf_' .. c .. '.lua')
+            require('leaf/leaf_' .. c .. '.lua')
             leaf.__unload[c] = true
         end
     end
@@ -149,7 +149,7 @@ if love then
 
             if not leaf.__unload[lib] then
 
-                dofile('leaf/leaf_' .. lib .. '.lua')
+                require('leaf/leaf_' .. lib .. '.lua')
             end
         end
 
