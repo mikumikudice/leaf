@@ -149,37 +149,48 @@ end
 
 --- decodes a binary file outputed by the Ethereal tilemap editor
 --- @param file string file path
---- @return table, table
+--- @return table back the 
+--- @return table main
 function leaf.decoder(file)
-    local cntt = love.filesystem.read('rooms/room_' .. room.rid .. '.map')
-    local backdata = cntt:sub(001, 289):split('ç')
-    local maindata = cntt:sub(292, 581):split('ç')
+    local info = love.filesystem.getInfo(file)
+    local cntt = love.filesystem.read(file)
+
+    local backdata
+    local maindata = cntt:sub(info.size - 288, info.size):split('ç')
 
     local _back = {}
     local _main = {}
 
-    for y = 0, #backdata - 1 do
-        --- internal class\
-        --- type that holds the (final) tiles data, i.e. the tiles used by leaf.tilemap
-        --- @class tileobj
-        --- @field p vector
-        --- @field s vector
-        --- @field c number
+    for chunk = 0, info.size - 376, 288 do
+        -- init table --
+        _back[chunk / 288 + 1] = {}
 
-        local line = backdata[y + 1]
-        for x = 0, #line - 1 do
+        backdata =
+        cntt:sub(chunk, chunk + 288):split('ç')
 
-            local rt = line:sub(x + 1, x + 1):byte()
-            local sx = rt % 16
-            local sy = (rt - sx) / 16
+        for y = 0, #backdata - 1 do
+            --- internal class\
+            --- type that holds the (final) tiles data, i.e. the tiles used by leaf.tilemap
+            --- @class tileobj
+            --- @field p vector
+            --- @field s vector
+            --- @field c number
 
-            --- @type tileobj
-            local tile = {
-                p = leaf.vector(x * 8 + 4, y * 8 + 4, 0.125),
-                s = leaf.vector(sx, sy, 8),
-                c = rt
-            }
-            table.insert(_back, tile)
+            local line = backdata[y + 1]
+            for x = 0, #line - 1 do
+
+                local rt = line:sub(x + 1, x + 1):byte()
+                local sx = rt % 16
+                local sy = (rt - sx) / 16
+
+                --- @type tileobj
+                local tile = {
+                    p = leaf.vector(x * 8 + 4, y * 8 + 4, 0.125),
+                    s = leaf.vector(sx, sy, 8),
+                    c = rt
+                }
+                table.insert(_back[chunk / 288 + 1], tile)
+            end
         end
     end
 

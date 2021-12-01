@@ -1,3 +1,6 @@
+## 1.5.1
+\* fixed bug with new update (multiple layers in tilemap)<br/>
+
 ## 1.5.0
 \+ now able to spawn different types of enemies with the tilemapper<br/>
 \+ now able to set multiple layers of tilemap<br/>
