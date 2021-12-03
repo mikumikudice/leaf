@@ -1,3 +1,12 @@
+## 1.5.2
+\+ added asserts in gramophone to avoid playing audios without defined tapes<br/>
+\+ added option do make platform objects solid<br/>
+\+ added mouse handling functions<br/>
+\+ added support to mobile platforms<br/>
+\* reduced max speed when falling (proportion)<br/>
+\* fixed bug with platform object not changing states when controlled by booleans<br/>
+\- remaining removed debug code<br/>
+
 ## 1.5.1
 \* fixed bug with new update (multiple layers in tilemap)<br/>
 \----

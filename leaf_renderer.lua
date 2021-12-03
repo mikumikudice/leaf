@@ -284,7 +284,23 @@ end
 
 --# animator -----------------------------------------------#--
 
+--- animator class\
+--- you should not access the animator fields. instead,
+--- it supposed to be used only by the other classes, internally
+--- @class animator
+--- @field afps number the current count of frames per second of the animation
+--- @field canm string the name of the current animation
+--- @field cfrm number current frame of the animation
+--- @field nfrm number the index of the current frame in the animation src table
+--- @field reload boolean sets the animator to restart the animation (set things to firt frame)
+--- @field timr number the internal timer of the animation
 local anim = {}
+
+--- animation src
+--- @class asrc
+--- @field count number the count of frames of the animation
+--- @field row number the sprite sheet table row where the animation is
+--- @field name string the name of the animation
 
 function anim:load()
 
@@ -355,6 +371,8 @@ function anim:loop()
 end
 
 function anim:draw(pos, side)
+    -- check for nil --
+    assert(pos and side, 'the given values are nil')
 
     if math.abs(side) > 1 then
 
@@ -433,19 +451,27 @@ local function stepped(name, rw, fx, mx, lx)
     return src
 end
 
-function leaf.asrc(name, ...)
+--- returns a new animation source (sample of sprites for the animator class).
+--- the aditional arguments can be int pairs (table) or ints themselves.
+--- when in pairs the [1] sprite will be appended [2] times at the end of the animation.
+--- when not, simply will be appended at the end of the animation.
+--- @param name string the name of the animation
+--- @param row  number the row of the sprite table where the animation is
+--- @param frst number the position of the first sprite of the animation
+--- @param last number the position of the last sprite of the animation
+--- @return asrc src
+function leaf.asrc(name, row, frst, last, ...)
 
     local src
-
     if name:sub(1, 4) == 'stp-' then
 
-        src = stepped(name, ...)
+        src = stepped(name, row, frst, last, ...)
 
     elseif name:sub(1, 4) == 'def-' then
 
-        src = default(name, ...)
+        src = default(name, row, frst, last, ...)
 
-    else src = default(name, ...) end
+    else src = default(name, row, frst, last, ...) end
 
     return src
 end

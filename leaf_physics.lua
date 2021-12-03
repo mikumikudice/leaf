@@ -181,13 +181,17 @@
     --- @param p vector position of the char
     --- @param c sqrdat current platform object collider stat
     --- @param down boolean sets the jumpthru flag (platform tiles become unsolid if true)
-    function leaf.coll(p, c, down)
-
+    function leaf.coll(p, c, down, obj)
+        -- round things to easier work --
         local pos = leaf.vector(math.floor(p.x), math.floor(p.y))
         local dg  = c.size - c.size / 4
         local hf  = c.size / 2
+
         -- check every platform --
-        for _, l in pairs(leaf.plat) do
+        for n, l in pairs(leaf.plat) do
+            if obj and obj.is_solid then
+                if n == tostring(obj) then goto continue end
+            end
             -- check if object is between walls of platform --
             if pos.x > l.lft - c.size and pos.x < l.rgt then
                 -- set floor --
@@ -225,11 +229,12 @@
                 if  pos.x < l.rgt
                 and pos.x >= l.lft - c.size + hf then p.x = l.rgt end
             end
+            ::continue::
         end
     end
 
-    --- desc: removes a platform from the collision context\
-    --- apdx: works only for named platforms (see leaf.add_plat)
+    --- removes a platform from the collision context
+    --- @warning works only for named platforms (see leaf.add_plat)
     --- @param name string
     function leaf.del_plat(name)
 
@@ -247,11 +252,24 @@
                 plat.rgt - plat.lft,
                 plat.flr - plat.rff
             )
-            leaf.log('plat', plat.lft, plat.rff,
-            plat.rgt - plat.lft,
-            plat.flr - plat.rff)
         end
         leaf.color()
+    end
+
+    --- moves a named platform to a new position
+    --- @param name string platform name
+    --- @param vect vector new position
+    function leaf.move_plat(name, vect)
+        -- avoid nil reads --
+        assert(leaf.plat[name], 'attempt to move a unknown platform')
+
+        local diff =
+        leaf.vector(vect.x - leaf.plat[name].lft, vect.y - leaf.plat[name].flr)
+
+        leaf.plat[name].lft = vect.x
+        leaf.plat[name].rgt = leaf.plat[name].rgt + diff.x
+        leaf.plat[name].flr = vect.y
+        leaf.plat[name].rff = leaf.plat[name].rff + diff.y
     end
 
 --# catchable ----------------------------------------------#--
@@ -305,9 +323,16 @@
 
 --# platform -----------------------------------------------#--
 
+    --- platform object. can be used as player or enemy. can also be solid
+    --- @class platform
+    --- @field anim animator optional. the animator field of the object
+    --- @field ctrl table the table containing the keyset or the triggers for movement
+    --- @field clip table the table containing all animations used by the @{animator}
+    -- TODO --
     local platform = {}
     function platform:load(ipos, ctrl, def)
 
+        --- @type platform
         local obj = {}
 
         setmetatable(obj, self)
@@ -315,14 +340,14 @@
 
         if not def then def = {} end
 
-        -- Current position --
+        -- current position --
         obj.pos = ipos
 
-        -- Input control --
+        -- input control --
         obj.ctrl = ctrl
         obj.side = 1
 
-        -- Animations --
+        -- animations --
         obj.state = 'idle'
         obj.anim  = def.anim
         obj.clip  = def.clip
@@ -330,9 +355,21 @@
         def.size = def.size or 8
         def.mass = def.mass or 8
 
-    --# Physics control ------------------------------------#--
+    --# physics control ------------------------------------#--
 
-        -- Screen collision --
+        if def.solid then
+            obj.is_solid = true
+            leaf.add_plat(
+                def.solid,
+                leaf.newsqr(
+                    obj.pos.x, obj.pos.y,
+                    def.size , def.size
+                ),
+                tostring(obj)
+            )
+        end
+
+        -- screen collision --
         if not def.dcol then
             obj.dcol = leaf.sqrdat(
 
@@ -358,7 +395,7 @@
         obj.coyotim = def.coyote_time or 0
 
         obj.gravity = obj.jmp_stg * (obj.jmp_stg / (obj.jmp_stg / (def.mass * 0.4)))
-        obj.maxfall = obj.gravity * 0.4
+        obj.maxfall = obj.gravity * 0.35
         obj.on_land = true
 
         return obj
@@ -404,18 +441,38 @@
 
         elseif self.ctrl ~= nil then
             -- go to left if object can move --
-            if self.ctrl.lft == true and
-            self.pos.x - self.x_speed <= self.col.rt then
+            if self.ctrl.lft == true then
+                if self.pos.x - self.x_speed <= self.col.rt then
 
-                self.pos.x = self.pos.x - self.x_speed * 60 * dt
-                self.side  = -1
-            end
+                    self.pos.x = self.pos.x - self.x_speed * 60 * dt
+                    self.side  = -1
+                    self.state = "moving"
+
+                else self.state = "idle" end
             -- go to right if object can move --
-            if self.ctrl.rgt == true and
-            self.pos.x + self.x_speed >= self.col.lt then
+            elseif self.ctrl.rgt == true then
+                if self.pos.x + self.x_speed >= self.col.lt then
 
-                self.pos.x = self.pos.x + self.x_speed * 60 * dt
-                self.side  = 1
+                    self.pos.x = self.pos.x + self.x_speed * 60 * dt
+                    self.side  = 1
+                    self.state = "moving"
+
+                else self.state = "idle" end
+            else self.state = "idle" end
+
+            -- jump if object can do so --
+            if  self.ctrl.ups == true
+            and self:can_jmp() then
+                -- set once --
+                self.jmpd = true
+
+                self.y_speed = (self.jmp_stg / 2) * leaf.SSCALE / 2
+
+                if type(self.jmp_cnt) == 'boolean' then
+
+                    self.jmp_cnt = false
+
+                else self.jmp_cnt = self.jmp_cnt - 1 end
             end
         end
 
@@ -461,11 +518,16 @@
 
             else self.jmp_cnt = self.jmp_cnt - 1 end
         end
+    --# colider --------------------------------------------#--
+
+        if self.is_solid then
+            leaf.move_plat(tostring(self), self.pos)
+        end
 
     --# animation ------------------------------------------#--
 
         if self.anim then
-            -- Jumping --
+            -- jumping --
             if self.y_speed < 0 then
 
                 self.anim:play(dt, self.clip.jump, 8, true)
@@ -495,14 +557,14 @@
 
     function platform:collide()
         -- Reset collision paramters --
-        self.col     = leaf.table_copy(self.dcol)
+        self.col = leaf.table_copy(self.dcol)
 
         -- Give down key if is a playable object --
         if type(self.ctrl.dwn) == "string" then
 
-            leaf.coll(self.pos, self.col, leaf.btn(self.ctrl.dwn))
+            leaf.coll(self.pos, self.col, leaf.btn(self.ctrl.dwn), self)
 
-        else leaf.coll(self.pos, self.col, false) end
+        else leaf.coll(self.pos, self.col, false, self) end
     end
 
     function platform:fix_pos()
@@ -521,6 +583,9 @@
         end
     end
 
+    --- returns the current position of the object.
+    --- you can just access it by using .pos but please use this method
+    --- @param scale number optional. divides the acutal position by it
     function platform:get_pos(scale)
 
         if not scale then scale = 1 end
@@ -576,10 +641,10 @@
 
 --# PM Ghost -----------------------------------------------#--
 
-    -- The packman-like ghost stays --
-    -- in an enclosed area until it --
-    -- get something to haunt.      --
-
+    --- the packman-like ghost stays
+    --- in an enclosed area until it
+    --- get something to haunt.
+    --- @class pmghost
     local ghost = {}
 
     function ghost:load()
@@ -593,10 +658,10 @@
     end
 
     function ghost:init(min, max, pos, clip)
-        -- Missing arg --
+        -- missing arg --
         if not pos then pos = leaf.vector(0, 0) end
 
-        -- Habitation Space --
+        -- habitation Space --
         self.dhab = {lft = min, rgt = max} -- Default min and max
         self.habt = {lft = min, rgt = max} -- Current min and max
 

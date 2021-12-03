@@ -23,7 +23,7 @@ leaf is open source and free to use.
 
 ## How to Use
 
-leaf is a single lua file that can be loaded by the `require` function.
+leaf is a lua module that can be loaded using `require`.
 
 ```lua
 require 'leaf'
@@ -383,6 +383,26 @@ local def = {
 }
 
 local char = leaf.create('platform', leaf.vector(0, 0), ctrl, def)
+```
+If `ctrl` be a table of booleans, you can control indirectly the object, e.g.
+```lua
+local ctrl = {
+    lft = false,
+    rgt = false,
+    ups = false,
+    dwn = false,
+}
+local char = leaf.create('platform', leaf.vector(0, 0), ctrl, def)
+
+function leaf.step(dt)
+    -- updating this table updates the character's one --
+    -- when true, char moves, when false, char stops   --
+    ctrl.lft = leaf.btn('left')
+    ctrl.rgt = leaf.btn('right')
+    ctrl.ups = leaf.btn('up')
+
+    char:step(dt)
+end
 ```
 
 ## pm-ghost

@@ -83,7 +83,7 @@ if love then
         local comps = {...}
         for _, c in pairs(comps) do
 
-            require('leaf/leaf_' .. c .. '.lua')
+            require('leaf.leaf_' .. c)
             leaf.__unload[c] = true
         end
     end
@@ -140,6 +140,19 @@ if love then
         return out
     end
 
+    leaf.mouse = {
+        mlb = false, mrb = false, mmb = false,
+    }
+    function love.mousepressed(x, y, btn, istouch)
+        if btn == 1 then leaf.mouse.mlb = true end
+        if btn == 2 then leaf.mouse.mrb = true end
+        if btn == 3 then leaf.mouse.mmb = true end
+    end
+
+    function leaf.mlc() return leaf.mouse.mlb end
+    function leaf.mrc() return leaf.mouse.mrb end
+    function leaf.mmc() return leaf.mouse.mmb end
+
     -- leaf workflow --
     function love.load()
 
@@ -149,7 +162,7 @@ if love then
 
             if not leaf.__unload[lib] then
 
-                require('leaf/leaf_' .. lib .. '.lua')
+                require('leaf.leaf_' .. lib)
             end
         end
 
@@ -180,6 +193,9 @@ if love then
 
         leaf.inputs.prss = {}
         leaf.inputs.rlss = {}
+        leaf.mouse.mlb = false
+        leaf.mouse.mrb = false
+        leaf.mouse.mmb = false
     end
 
     function love.draw()

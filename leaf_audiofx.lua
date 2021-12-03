@@ -33,7 +33,7 @@ function gramophone.theme()
 end
 
 function gramophone.set(thm, stt)
-
+    assert(leaf.tapes, 'no playlist defined yet')
     if thm == 'main' then
 
         if stt then leaf.tapes.main:resume()
@@ -51,7 +51,8 @@ function gramophone.play(tape, track, loop)
 
     if loop == nil then loop = false end
 
-    assert(tape, track, 'invalid gramophone\'s parameters')
+    assert(leaf.tapes, 'no playlist defined yet')
+    assert(tape and track, 'invalid gramophone\'s parameters')
     -- 0 to 7 tracks --
     track = math.min(math.max(track, 0), 7)
 
